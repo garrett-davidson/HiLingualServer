@@ -27,46 +27,17 @@ let server = HTTPServer()
 // Register your own routes and handlers
 var routes = Routes()
 
-routes.add(method: .get, uri: "/user/**", handler: {
-		request, response in
-		response.setHeader(.contentType, value: "text/html")
-		response.appendBody(string: "<html><title>no</title><body>Hello, world!</body></html>")
-		response.completed()
-		print(request.urlVariables[routeTrailingWildcardKey])
-	}
-)
-
-routes.add(method: .get, uri: "/auth/**", handler: {
-		request, response in
-		response.setHeader(.contentType, value: "text/html")
-		response.appendBody(string: "<html><title>no</title><body>Hello, world!</body></html>")
-		response.completed()
-		print(request.urlVariables[routeTrailingWildcardKey])
-	}
-)
-routes.add(method: .get, uri: "/asset/**", handler: {
-		request, response in
-		response.setHeader(.contentType, value: "text/html")
-		response.appendBody(string: "<html><title>no</title><body>Hello, world!</body></html>")
-		response.completed()
-		print(request.urlVariables[routeTrailingWildcardKey])
-	}
-)
-routes.add(method: .get, uri: "/chat/**", handler: {
-		request, response in
-		response.setHeader(.contentType, value: "text/html")
-		response.appendBody(string: "<html><title>no</title><body>Hello, world!</body></html>")
-		response.completed()
-		print(request.urlVariables[routeTrailingWildcardKey])
-	}
-)
+routes.add(method: .get, uri: "/user/**", handler: handleUser)
+routes.add(method: .get, uri: "/auth/**", handler: handleAuth)
+routes.add(method: .get, uri: "/asset/**", handler: handleAsset)
+routes.add(method: .get, uri: "/chat/**", handler: handleChat)
 
 
 // Add the routes to the server.
 server.addRoutes(routes)
 
-// Set a listen port of 8181
-server.serverPort = 8182
+// Set a listen port of 8180
+server.serverPort = 8180
 
 // Set a document root.
 // This is optional. If you do not want to serve static content then do not set this.
