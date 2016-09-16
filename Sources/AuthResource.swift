@@ -16,12 +16,23 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 	print(urlString)
 	if urlString == "login" {
 		loginWith(request: request, response)
-	} else if urlString == ""
+	} else if urlString == "register" {
+		registerWith(request: request, response)
+	} else if urlString == "logout" {
+		logoutWith(request: request, response)
+	}
 	guard let auth = request.param(name: "auth") else {
 		print("no auth parameter")
         return
     }
 }
 func loginWith(request: HTTPRequest, _ response: HTTPResponse){
+	print("in login")
+}
 
+func logoutWith(request: HTTPRequest, _ response: HTTPResponse){
+	print("in logout")
+}
+func registerWith(request: HTTPRequest, _ response: HTTPResponse){
+	print("in register")
 }
