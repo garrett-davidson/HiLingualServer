@@ -15,14 +15,20 @@ func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         return
     }
 
-    guard let recipient = request.param(name: "recipient") else {
+    guard let recipientString = request.param(name: "recipient") else {
         return
     }
 
     guard let message = request.param(name: "message") else {
         return
     }
+
     print("auth=\(auth)")
-    print("recipient=\(recipient)")
+    print("recipient=\(recipientString)")
     print("message=\(message)")
+    guard let recipient = Int(recipientString) else {
+        print("invalid recipient ID")
+        return
+    }
+    addChatToTable(auth: auth, recipient: recipient, message: message)
 }
