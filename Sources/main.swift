@@ -3,7 +3,7 @@
 //  PerfectTemplate
 //
 //  Created by Kyle Jessup on 2015-11-05.
-//	Copyright (C) 2015 PerfectlySoft, Inc.
+//      Copyright (C) 2015 PerfectlySoft, Inc.
 //
 //===----------------------------------------------------------------------===//
 //
@@ -85,35 +85,35 @@ public func useMysql() {
 
     } else {
 
-	guard dataMysql.query(statement: "CREATE DATABASE \(testSchema) ") else {
-	    print("Error creating db")
-	    return
-	}
+        guard dataMysql.query(statement: "CREATE DATABASE \(testSchema) ") else {
+            print("Error creating db")
+            return
+        }
 
-    	guard dataMysql.query(statement: "USE \(testSchema) ") else {
-    	    print("Error creating table1")
-	    return
-    	}
+        guard dataMysql.query(statement: "USE \(testSchema) ") else {
+            print("Error creating table1")
+            return
+        }
 
-    	guard dataMysql.query(statement: "\(createUsersTableQuery)") else {
-    	    print("Error creating user table")
-	    return
-    	}
+        guard dataMysql.query(statement: "\(createUsersTableQuery)") else {
+            print("Error creating user table")
+            return
+        }
 
-    	guard dataMysql.query(statement: "\(createMessagesTableQuery)") else {
-    	    print("Error creating message table")
-	    return
-    	}
+        guard dataMysql.query(statement: "\(createMessagesTableQuery)") else {
+            print("Error creating message table")
+            return
+        }
 
-	guard dataMysql.query(statement: "\(createFacebookTableQuery)") else {
-	    print("Error creating facebook auth table")
-	    return
-	}
+        guard dataMysql.query(statement: "\(createFacebookTableQuery)") else {
+            print("Error creating facebook auth table")
+            return
+        }
 
-	guard dataMysql.query(statement: "\(createGoogleTableQuery)") else {
-	    print("Error creating google auth table")
-	    return
-	}
+        guard dataMysql.query(statement: "\(createGoogleTableQuery)") else {
+            print("Error creating google auth table")
+            return
+        }
     }
 }
 
@@ -124,8 +124,8 @@ useMysql()
 // Command line arguments will supplant any of the values set above.
 configureServer(server)
 do {
-	// Launch the HTTP server.
-	try server.start()
+        // Launch the HTTP server.
+        try server.start()
 } catch PerfectError.networkError(let err, let msg) {
-	print("Network error thrown: \(err) \(msg)")
+        print("Network error thrown: \(err) \(msg)")
 }
