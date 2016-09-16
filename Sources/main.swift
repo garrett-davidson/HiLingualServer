@@ -65,6 +65,7 @@ routes.add(method: .get, uri: "/auth/**", handler: handleAuth)
 routes.add(method: .get, uri: "/asset/**", handler: handleAsset)
 routes.add(method: .get, uri: "/chat/**", handler: handleChat)
 
+
 // Add the routes to the server.
 server.addRoutes(routes)
 
