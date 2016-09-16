@@ -9,5 +9,3 @@ func handleChat(request: HTTPRequest, _ response: HTTPResponse) {
 	print(request.urlVariables[routeTrailingWildcardKey])
 	response.completed()
 }
-
-

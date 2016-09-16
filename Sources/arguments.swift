@@ -29,12 +29,12 @@ import PerfectLib
 // Check all command line arguments used to configure the server.
 // These are all optional and you can remove or add arguments as required.
 func configureServer(_ server: HTTPServer) {
-	
+
 	var sslCert: String?
 	var sslKey: String?
-	
+
 	var args = CommandLine.arguments
-	
+
 	func argFirst() -> String {
 		guard let frst = args.first else {
 			print("Argument requires value.")
@@ -42,7 +42,7 @@ func configureServer(_ server: HTTPServer) {
 		}
 		return frst
 	}
-	
+
 	let validArgs = [
 		"--sslcert": {
 			args.removeFirst()
@@ -76,14 +76,14 @@ func configureServer(_ server: HTTPServer) {
 			print("Usage: \(CommandLine.arguments.first!) [--port listen_port] [--address listen_address] [--name server_name] [--root root_path] [--sslcert cert_path --sslkey key_path] [--runas user_name]")
 			exit(0)
 		}]
-	
+
 	while args.count > 0 {
 		if let closure = validArgs[args.first!.lowercased()] {
 			closure()
 		}
 		args.removeFirst()
 	}
-	
+
 	if sslCert != nil || sslKey != nil {
 		if sslCert == nil || sslKey == nil {
 			print("Error: if either --sslcert or --sslkey is provided then both --sslcert and --sslkey must be provided.")

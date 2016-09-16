@@ -9,5 +9,3 @@ func handleAsset(request: HTTPRequest, _ response: HTTPResponse) {
 	print(request.urlVariables[routeTrailingWildcardKey])
 	response.completed()
 }
-
-
