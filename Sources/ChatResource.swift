@@ -11,15 +11,15 @@ func handleChat(request: HTTPRequest, _ response: HTTPResponse) {
 }
 
 func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
-    guard auth = request.param(name: "auth") else {
+    guard let auth = request.param(name: "auth") else {
         return
     }
 
-    guard recipient = request.param(name: "recipient") else {
+    guard let recipient = request.param(name: "recipient") else {
         return
     }
 
-    guard message = request.param(name: "message") else {
+    guard let message = request.param(name: "message") else {
         return
     }
     print("auth=\(auth)")
