@@ -36,7 +36,7 @@ let testSchema = "HiLingualDB"
 let createMessagesTableQuery = "CREATE TABLE IF NOT EXISTS hl_chat_messages(" +
                 "message_id BIGINT UNIQUE PRIMARY KEY AUTO_INCREMENT, " +
                 "sent_timestamp TIMESTAMP, " +
-                "edit_timestamp TIMESTAMP, " +
+                "edit_timestamp DATETIME, " +
                 "sender_id BIGINT, " +
                 "receiver_id BIGINT, " +
                 "message VARCHAR(500), " +
@@ -96,22 +96,22 @@ public func useMysql() {
     	}
 
     	guard dataMysql.query(statement: "\(createUsersTableQuery)") else {
-    	    print("Error creating table2")
+    	    print("Error creating user table")
 	    return
     	}
 
     	guard dataMysql.query(statement: "\(createMessagesTableQuery)") else {
-    	    print("Error creating table3")
+    	    print("Error creating message table")
 	    return
     	}
 
 	guard dataMysql.query(statement: "\(createFacebookTableQuery)") else {
-	    print("Error creating table")
+	    print("Error creating facebook auth table")
 	    return
 	}
 
 	guard dataMysql.query(statement: "\(createGoogleTableQuery)") else {
-	    print("Error creating table")
+	    print("Error creating google auth table")
 	    return
 	}
     }
