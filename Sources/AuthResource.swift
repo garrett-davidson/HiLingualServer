@@ -5,6 +5,7 @@ import PerfectHTTP
 func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 	//parse uri and call relevant funtion
 	//response.setHeader(.contentType, value: "text/html")
+	print("start")
 	defer {
 		response.completed()
 	}
@@ -13,9 +14,10 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 	}
 
 	//deserialize request JSON body to Dictionary
-	var jsonString: String! = request.postBodyString
+	let jsonString: String! = request.postBodyString
 	do {
 		guard let result = try jsonString.jsonDecode() as? Dictionary<String, AnyObject> else {
+			print("invalid json string")
 			return
 		}
 
@@ -25,8 +27,6 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 			unauthorizedResponse(response: response)
 	        return
 	    }
-
-
 		//parse uri
 		urlString.remove(at: urlString.startIndex)
 		print(urlString)	
@@ -39,39 +39,74 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 		}
 		response.completed()
 	} catch {
-		//invalid json
+		print("bad request")
 		badRequestResponse(response: response)
 		return
 	}
+	response.completed()
 
 }
 func verifyAuthToken(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>) -> Bool{
 	//https://graph.facebook.com/me?access_token=xxxxxxxxxxxxxxxxx     FACEBOOK URL
     guard let token = requestBodyDic["authorityToken"] as? String else {
-   		print("serious issue in auth")
+   		print("no auth token sent")
    		return false
     }
-    let scriptURL = "https://graph.facebook.com/me?access_token=\(token)"
-    // Create NSURL Ibject
-    let myUrl = NSURL(string: scriptURL);
-    
-    // Creaste URL Request
-    /*let request = NSMutableURLRequest(URL:myUrl! as URL);
-  
-    // Set request HTTP method to GET. It could be POST as well
-    request.HTTPMethod = "GET"
-
- 	let task = URLSession.sharedSession().dataTaskWithRequest(request) {
-        data, response, error in
-        if error != nil
-        {
-            print("error=\(error)")
-            return false
-        }else{
-        	return true
-        }
+    guard let auth = requestBodyDic["authority"] as? String else {
+   		print("no authority sent")
+   		return false
     }
-    task.resume()*/
+    if auth == "FACEBOOK" {
+    	return checkFacebookAuthority(token)
+    }else if auth == "GOOGLE" {
+    	return checkGoogleAuthority(token)
+	}else {
+		print("bad authority sent")
+   		return false
+	}
+}
+func checkGoogleAuthority(_ token: String) -> Bool{
+    let scriptURL = "https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=\(token)"
+    let myUrl = URL(string: scriptURL);
+    guard let request1: URLRequest = URLRequest(url: myUrl!) else {
+    	return false
+    }
+    let response: AutoreleasingUnsafeMutablePointer<URLResponse?>?=nil
+    do {
+        let dataVal = try NSURLConnection.sendSynchronousRequest(request1, returning: response)
+            do {
+                if let jsonResult = try JSONSerialization.jsonObject(with: dataVal, options: []) as? NSDictionary {
+                	print(jsonResult)
+                	return true
+                }
+            } catch let error as NSError {
+                print(error.localizedDescription)
+            }
+    } catch let error as NSError {
+         print(error.localizedDescription)
+    }
+    return false
+}
+func checkFacebookAuthority(_ token: String) -> Bool{
+    let scriptURL = "https://graph.facebook.com/me?access_token=\(token)"
+    let myUrl = URL(string: scriptURL);
+    guard let request1: URLRequest = URLRequest(url: myUrl!) else {
+    	return false
+    }
+    let response: AutoreleasingUnsafeMutablePointer<URLResponse?>?=nil
+    do {
+        let dataVal = try NSURLConnection.sendSynchronousRequest(request1, returning: response)
+            do {
+                if let jsonResult = try JSONSerialization.jsonObject(with: dataVal, options: []) as? NSDictionary {
+                    print(jsonResult)
+                    return true
+                }
+            } catch let error as NSError {
+                print(error.localizedDescription)
+            }
+    } catch let error as NSError {
+         print(error.localizedDescription)
+    }
     return false
 }
 func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>){
