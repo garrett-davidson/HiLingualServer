@@ -45,6 +45,35 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 	}
 
 }
+func verifyAuthToken(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>) -> Bool{
+	//https://graph.facebook.com/me?access_token=xxxxxxxxxxxxxxxxx     FACEBOOK URL
+    guard let token = requestBodyDic["authorityToken"] as? String else {
+   		print("serious issue in auth")
+   		return false
+    }
+    let scriptURL = "https://graph.facebook.com/me?access_token=\(token)"
+    // Create NSURL Ibject
+    let myUrl = NSURL(string: scriptURL);
+    
+    // Creaste URL Request
+    /*let request = NSMutableURLRequest(URL:myUrl! as URL);
+  
+    // Set request HTTP method to GET. It could be POST as well
+    request.HTTPMethod = "GET"
+
+ 	let task = URLSession.sharedSession().dataTaskWithRequest(request) {
+        data, response, error in
+        if error != nil
+        {
+            print("error=\(error)")
+            return false
+        }else{
+        	return true
+        }
+    }
+    task.resume()*/
+    return false
+}
 func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>){
 	print("Logging in user")
 	print(requestBodyDic["authority"])
