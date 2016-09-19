@@ -18,10 +18,7 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 		guard let result = try jsonString.jsonDecode() as? Dictionary<String, AnyObject> else {
 			return
 		}
-		/*if result["authority"] as! String == "FACEBOOK" {
-			print("ildsfhalkdf")
-		}
-	*/
+
 		//validate request
 		guard let auth = request.header(HTTPRequestHeader.Name.authorization) else {
 			print("no auth parameter")
@@ -42,22 +39,37 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 		}
 		response.completed()
 	} catch {
+		//invalid json
+		badRequestResponse(response: response)
 		return
 	}
 
 }
 func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>){
-	print("in login")
+	print("Logging in user")
 	print(requestBodyDic["authority"])
+	print(requestBodyDic["authorityAccountId"])
+	print(requestBodyDic["authorityToken"])
+	//TODO: validate auth token
+	//create session/session token with hilingual
+	//respond to user
 }
 
 func logoutWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>){
-	print("in logout")
+	print("Logging out user")
 	print(requestBodyDic["authority"])
+	print(requestBodyDic["authorityAccountId"])
+	print(requestBodyDic["authorityToken"])
+	//TODO: revoke hilingual session
+	//respond to user
 }
 func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>){
-	print("in register")
+	print("Registering new user")
 	print(requestBodyDic["authority"])
+	print(requestBodyDic["authorityAccountId"])
+	print(requestBodyDic["authorityToken"])
+	//create new user in database
+	//respond to user
 }
 func badRequestResponse(response: HTTPResponse) {
 	//400 code
