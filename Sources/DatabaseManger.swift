@@ -20,6 +20,7 @@ let createUsersTableQuery = "CREATE TABLE IF NOT EXISTS hl_users(" +
     "user_name TINYTEXT, " +
     "birth_date DATE, " +
     "known_languages LONGTEXT, " +
+    "session_token LONGTEXT, " +
 "learning_languages LONGTEXT);"
 let createFacebookTableQuery = "CREATE TABLE IF NOT EXISTS hl_facebook_data(" +
     "user_id BIGINT UNIQUE PRIMARY KEY, " +
@@ -41,7 +42,7 @@ func setupMysql() {
 
     if !dataMysql.selectDatabase(named: testSchema) {
 
-        guard dataMysql.query(statement: "CREATE DATABASE \(testSchema) ") else {
+        guard dataMysql.query(statement: "CREATE DATABASE \(testSchema)") else {
             print("Error creating db")
             return
         }
@@ -78,4 +79,38 @@ func addChatToTable(auth: String, recipient: Int, message: String) {
         return
     }
 
+}
+func createUserWith(token: String) -> User {
+    let newUser = User()
+    guard dataMysql.query(statement: "INSERT INTO hl_users (session_token) VALUES(\"\(token)\");") else {
+        print("Error inserting into hl_users")
+        return newUser
+    }
+    guard dataMysql.query(statement: "SELECT LAST_INSERT_ROWID();") else {
+        print("Mysql error")
+        return newUser
+    }
+    let results = dataMysql.storeResults()!
+    guard results.numRows() == 1 else {
+        print("no rows found")
+        return newUser
+    }
+    
+    results.forEachRow { row in
+        // each row is a of type MySQL.MySQL.Results.Type.Element
+        // which is just a typealias for [String]
+        print("fetched: \(row)")
+        let content = row[0] // element 0 will be Content because it was the first (and only) colum in our query
+        print("Id:")
+        print(content)
+        return
+
+    }
+    return newUser
+}
+func logoutUserWith(authAccountId: String, sessionId: String) {
+    print("logging out")
+}
+func loginUserWith(authAccountId: String, sessionId: String) {
+    print("logging out user")
 }

@@ -8,6 +8,16 @@ class User {
 	private var authorityAccountId: Int
 	private var sessionToken: Int
 
+	init() {
+		self.userId = 0
+		self.name = "newName"
+		self.displayName = "newDisplayName"
+		self.bio = "newBio"
+		self.gender = Gender.NOTSET
+		self.birthdate = 0
+		self.authorityAccountId = 0
+		self.sessionToken = 0
+	}
 	init(newUserId: Int, newName: String, newDisplayName: String, newBio: String, newGender: Gender, newBirthdate: Int, authorityAccountId: Int, sessionToken: Int) {
 		self.userId = newUserId
 		self.name = newName

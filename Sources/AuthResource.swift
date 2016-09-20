@@ -147,14 +147,15 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
 	   		print("no auth token sent")
 	   		return
     	}
-		var user = createUser(token: token)
-		var dict = ["userId": user.userId, "sessionId": user.sessionToken] // dict is of type Dictionary<Int, String>
-		//do {
-		//    let jsonData = try JSONSerialization.data(withJSONObject: dict, options: .prettyPrinted)     
-		response.setBody(json: dict)
-		//} catch let error as NSError {
-		//    print(error)
-		//}
+    	print("here")
+		var user = createUserWith(token: token)
+		var dict = ["userId": user.getUserId(), "sessionId": user.getSessionToken()] // dict is of type Dictionary<Int, String>
+		do {
+			try response.setBody(json: dict)
+		} catch {
+			print(error)
+		}
+		
 	}else {
 		errorResponse(response: response)
 	}
