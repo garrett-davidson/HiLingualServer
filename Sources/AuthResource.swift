@@ -72,19 +72,22 @@ func checkGoogleAuthority(_ token: String) -> Bool {
     guard let request1: URLRequest = URLRequest(url: myUrl!) else {
     	return false
     }
-    let response: AutoreleasingUnsafeMutablePointer<URLResponse?>?=nil
     do {
-        let dataVal = try NSURLConnection.sendSynchronousRequest(request1, returning: response)
+	     var response: URLResponse?
+    
+        let dataVal = try NSURLConnection.sendSynchronousRequest(request1, returning: &response)
             do {
-                if response.status == HTTPResponseStatus.ok {
-                		return true
-                	} else {
-                		return false
-                	}
-                }
+            	if let httpResponse = response as? HTTPURLResponse {
+	                if httpResponse.statusCode == 200{
+	            		return true
+	            	} else {
+	            		return false
+	            	}
+	            }
             } catch let error as NSError {
                 print(error.localizedDescription)
             }
+
     } catch let error as NSError {
          print(error.localizedDescription)
     }
@@ -96,16 +99,18 @@ func checkFacebookAuthority(_ token: String) -> Bool {
     guard let request1: URLRequest = URLRequest(url: myUrl!) else {
     	return false
     }
-    let response: AutoreleasingUnsafeMutablePointer<URLResponse?>?=nil
     do {
-        let dataVal = try NSURLConnection.sendSynchronousRequest(request1, returning: response)
+	    var response: URLResponse?
+    
+        let dataVal = try NSURLConnection.sendSynchronousRequest(request1, returning: &response)
             do {
-                if response.status == HTTPResponseStatus.ok {
-                		return true
-                	} else {
-                		return false
-                	}
-                }
+                if let httpResponse = response as? HTTPURLResponse {
+                	if httpResponse.statusCode == 200 {
+	            		return true
+	            	} else {
+	            		return false
+	            	}
+            	}
             } catch let error as NSError {
                 print(error.localizedDescription)
             }
@@ -137,6 +142,7 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
 	print(requestBodyDic["authority"])
 	print(requestBodyDic["authorityAccountId"])
 	print(requestBodyDic["authorityToken"])
+	print(verifyAuthToken(request: request, response, requestBodyDic))
 	//create new user in database
 	//respond to user
 }
