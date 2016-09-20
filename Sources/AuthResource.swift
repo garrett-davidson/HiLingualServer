@@ -48,6 +48,7 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 }
 func verifyAuthToken(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>) -> Bool{
 	//https://graph.facebook.com/me?access_token=xxxxxxxxxxxxxxxxx     FACEBOOK URL
+	//
     guard let token = requestBodyDic["authorityToken"] as? String else {
    		print("no auth token sent")
    		return false
@@ -75,9 +76,11 @@ func checkGoogleAuthority(_ token: String) -> Bool{
     do {
         let dataVal = try NSURLConnection.sendSynchronousRequest(request1, returning: response)
             do {
-                if let jsonResult = try JSONSerialization.jsonObject(with: dataVal, options: []) as? NSDictionary {
-                	print(jsonResult)
-                	return true
+                if response.status == HTTPResponseStatus.ok {
+                		return true
+                	} else {
+                		return false
+                	}
                 }
             } catch let error as NSError {
                 print(error.localizedDescription)
@@ -97,9 +100,11 @@ func checkFacebookAuthority(_ token: String) -> Bool{
     do {
         let dataVal = try NSURLConnection.sendSynchronousRequest(request1, returning: response)
             do {
-                if let jsonResult = try JSONSerialization.jsonObject(with: dataVal, options: []) as? NSDictionary {
-                    print(jsonResult)
-                    return true
+                if response.status == HTTPResponseStatus.ok {
+                		return true
+                	} else {
+                		return false
+                	}
                 }
             } catch let error as NSError {
                 print(error.localizedDescription)
