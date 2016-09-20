@@ -27,13 +27,13 @@ func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         invalidMessage(request: request, response)
         return
     }
-    
-    if message.characters.count > 500{
+
+    if message.characters.count > 500 {
         print("message to long")
         invalidMessage(request: request, response)
         return
     }
-    
+
     print("auth=\(auth)")
     print("recipient=\(recipientString)")
     print("message=\(message)")
@@ -45,7 +45,7 @@ func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     addChatToTable(auth: auth, recipient: recipient, message: message)
 }
 
-func invalidMessage(request: HTTPRequest, _ response: HTTPResponse){
+func invalidMessage(request: HTTPRequest, _ response: HTTPResponse) {
     response.setHeader(.contentType, value: "text/html")
     response.setBody(string: "<html><title>chat</title><body>Invalid message!</body></html>")
 }
