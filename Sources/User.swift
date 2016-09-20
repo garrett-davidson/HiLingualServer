@@ -5,14 +5,16 @@ class User {
 	private var bio: String
 	private var gender: Gender
 	private var birthdate: Int
+	private var sessionToken: Int
 
-	init(newUserId: Int, newName: String, newDisplayName: String, newBio: String, newGender: Gender, newBirthdate: Int) {
+	init(newUserId: Int, newName: String, newDisplayName: String, newBio: String, newGender: Gender, newBirthdate: Int, sessionToken: Int) {
 		self.userId = newUserId
 		self.name = newName
 		self.displayName = newDisplayName
 		self.bio = newBio
 		self.gender = newGender
 		self.birthdate = newBirthdate
+		self.sessionToken = sessionToken
 	}
 
 
@@ -33,6 +35,9 @@ class User {
 	}
 	func getBirthdate() -> Int {
 		return self.birthdate
+	}
+	func getSessionToken() -> Int {
+		return self.sessionToken
 	}
 
 	func setName(newName: String) {
