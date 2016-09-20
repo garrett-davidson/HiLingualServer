@@ -135,7 +135,7 @@ func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic:
 	   		badRequestResponse(response: response)
 	   		return
     	}
-    	loginUser(authAccountId: authID,sessionID: token)
+    	loginUserWith(authAccountId: authID,sessionId: token)
 	}else {
 		errorResponse(response: response)
 	}
@@ -157,7 +157,7 @@ func logoutWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic
 	   		badRequestResponse(response: response)
 	   		return
     	}
-    	logoutUser(authAccountId: authID,sessionID: token)
+    	logoutUserWith(authAccountId: authID,sessionId: token)
 	}else {
 		errorResponse(response: response)
 	}
@@ -172,9 +172,13 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
 	   		print("no auth token sent")
 	   		return
     	}
-		var user = createUser(token: token)
-		var dict = ["userId": user.userId, "sessionId": user.sessionToken] 
-		response.setBody(json: dict)
+		var user = createUserWith(token: token)
+		var dict = ["userId": user.getUserId(), "sessionId": user.getSessionToken()]
+		do {
+			try response.setBody(json: dict)
+		} catch {
+			print(error)
+		}
 	}else {
 		unauthorizedResponse(response: response)
 	}
