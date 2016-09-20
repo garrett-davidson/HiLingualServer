@@ -124,9 +124,21 @@ func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic:
 	print(requestBodyDic["authority"])
 	print(requestBodyDic["authorityAccountId"])
 	print(requestBodyDic["authorityToken"])
-	//todo: validate auth token
-	//create session/session token with hilingual
-	//respond to user
+	if verifyAuthToken(request: request, response, requestBodyDic) {
+		guard let token = requestBodyDic["authorityToken"] as? String else {
+	   		print("no auth token sent")
+	   		badRequestResponse(response: response)
+	   		return
+    	}
+    	guard let authID = requestBodyDic["authorityAccountId"] as? String else {
+	   		print("no authID sent")
+	   		badRequestResponse(response: response)
+	   		return
+    	}
+    	loginUser(authAccountId: authID,sessionID: token)
+	}else {
+		errorResponse(response: response)
+	}
 }
 
 func logoutWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>) {
@@ -134,8 +146,21 @@ func logoutWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic
 	print(requestBodyDic["authority"])
 	print(requestBodyDic["authorityAccountId"])
 	print(requestBodyDic["authorityToken"])
-	//todo: revoke hilingual session
-	//respond to user
+	if verifyAuthToken(request: request, response, requestBodyDic) {
+		guard let token = requestBodyDic["authorityToken"] as? String else {
+	   		print("no auth token sent")
+	   		badRequestResponse(response: response)
+	   		return
+    	}
+    	guard let authID = requestBodyDic["authorityAccountId"] as? String else {
+	   		print("no authID sent")
+	   		badRequestResponse(response: response)
+	   		return
+    	}
+    	logoutUser(authAccountId: authID,sessionID: token)
+	}else {
+		errorResponse(response: response)
+	}
 }
 func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>) {
 	print("Registering new user")
@@ -147,22 +172,17 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
 	   		print("no auth token sent")
 	   		return
     	}
-    	print("here")
-		var user = createUserWith(token: token)
-		var dict = ["userId": user.getUserId(), "sessionId": user.getSessionToken()] // dict is of type Dictionary<Int, String>
-		do {
-			try response.setBody(json: dict)
-		} catch {
-			print(error)
-		}
-		
+		var user = createUser(token: token)
+		var dict = ["userId": user.userId, "sessionId": user.sessionToken] 
+		response.setBody(json: dict)
 	}else {
-		errorResponse(response: response)
+		unauthorizedResponse(response: response)
 	}
 
 	//create new user in database
 	//respond to user
 }
+
 func badRequestResponse(response: HTTPResponse) {
 	//400 code
 	response.setHeader(.contentType, value: "text/html")
@@ -176,5 +196,5 @@ func unauthorizedResponse(response: HTTPResponse) {
 func errorResponse(response: HTTPResponse) {
 	//500 code
 	response.setHeader(.contentType, value: "text/html")
-	response.status = HTTPResponseStatus.unauthorized
+	response.status = HTTPResponseStatus.internalServerError
 }
