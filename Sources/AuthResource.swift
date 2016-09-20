@@ -29,13 +29,13 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 	    }
 		//parse uri
 		urlString.remove(at: urlString.startIndex)
-		print(urlString)	
+		print(urlString)
 		if urlString == "login" {
 			loginWith(request: request, response, result)
 		} else if urlString == "register" {
-			registerWith(request: request, response,result)
+			registerWith(request: request, response, result)
 		} else if urlString == "logout" {
-			logoutWith(request: request, response,result)
+			logoutWith(request: request, response, result)
 		}
 		response.completed()
 	} catch {
@@ -46,7 +46,7 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 	response.completed()
 
 }
-func verifyAuthToken(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>) -> Bool{
+func verifyAuthToken(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>) -> Bool {
 	//https://graph.facebook.com/me?access_token=xxxxxxxxxxxxxxxxx     FACEBOOK URL
 	//
     guard let token = requestBodyDic["authorityToken"] as? String else {
@@ -59,16 +59,16 @@ func verifyAuthToken(request: HTTPRequest, _ response: HTTPResponse, _ requestBo
     }
     if auth == "FACEBOOK" {
     	return checkFacebookAuthority(token)
-    }else if auth == "GOOGLE" {
+    } else if auth == "GOOGLE" {
     	return checkGoogleAuthority(token)
-	}else {
+	} else {
 		print("bad authority sent")
    		return false
 	}
 }
-func checkGoogleAuthority(_ token: String) -> Bool{
+func checkGoogleAuthority(_ token: String) -> Bool {
     let scriptURL = "https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=\(token)"
-    let myUrl = URL(string: scriptURL);
+    let myUrl = URL(string: scriptURL)
     guard let request1: URLRequest = URLRequest(url: myUrl!) else {
     	return false
     }
@@ -90,9 +90,9 @@ func checkGoogleAuthority(_ token: String) -> Bool{
     }
     return false
 }
-func checkFacebookAuthority(_ token: String) -> Bool{
+func checkFacebookAuthority(_ token: String) -> Bool {
     let scriptURL = "https://graph.facebook.com/me?access_token=\(token)"
-    let myUrl = URL(string: scriptURL);
+    let myUrl = URL(string: scriptURL)
     guard let request1: URLRequest = URLRequest(url: myUrl!) else {
     	return false
     }
@@ -114,25 +114,25 @@ func checkFacebookAuthority(_ token: String) -> Bool{
     }
     return false
 }
-func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>){
+func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>) {
 	print("Logging in user")
 	print(requestBodyDic["authority"])
 	print(requestBodyDic["authorityAccountId"])
 	print(requestBodyDic["authorityToken"])
-	//TODO: validate auth token
+	//todo: validate auth token
 	//create session/session token with hilingual
 	//respond to user
 }
 
-func logoutWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>){
+func logoutWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>) {
 	print("Logging out user")
 	print(requestBodyDic["authority"])
 	print(requestBodyDic["authorityAccountId"])
 	print(requestBodyDic["authorityToken"])
-	//TODO: revoke hilingual session
+	//todo: revoke hilingual session
 	//respond to user
 }
-func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>){
+func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>) {
 	print("Registering new user")
 	print(requestBodyDic["authority"])
 	print(requestBodyDic["authorityAccountId"])
@@ -143,15 +143,15 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
 func badRequestResponse(response: HTTPResponse) {
 	//400 code
 	response.setHeader(.contentType, value: "text/html")
-	response.status = HTTPResponseStatus.badRequest;
+	response.status = HTTPResponseStatus.badRequest
 }
 func unauthorizedResponse(response: HTTPResponse) {
 	//401 code
 	response.setHeader(.contentType, value: "text/html")
-	response.status = HTTPResponseStatus.unauthorized;
+	response.status = HTTPResponseStatus.unauthorized
 }
 func errorResponse(response: HTTPResponse) {
 	//500 code
 	response.setHeader(.contentType, value: "text/html")
-	response.status = HTTPResponseStatus.unauthorized;
+	response.status = HTTPResponseStatus.unauthorized
 }
