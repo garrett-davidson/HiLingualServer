@@ -132,6 +132,7 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
 	print(requestBodyDic["authority"])
 	print(requestBodyDic["authorityAccountId"])
 	print(requestBodyDic["authorityToken"])
+	print(verifyAuthToken(request: request, response, requestBodyDic))
 	//create new user in database
 	//respond to user
 }
