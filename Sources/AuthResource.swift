@@ -142,7 +142,23 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
 	print(requestBodyDic["authority"])
 	print(requestBodyDic["authorityAccountId"])
 	print(requestBodyDic["authorityToken"])
-	print(verifyAuthToken(request: request, response, requestBodyDic))
+	if verifyAuthToken(request: request, response, requestBodyDic) {
+		guard let token = requestBodyDic["authorityToken"] as? String else {
+	   		print("no auth token sent")
+	   		return
+    	}
+		var user = createUser(token: token)
+		var dict = ["userId": user.userId, "sessionId": user.sessionToken] // dict is of type Dictionary<Int, String>
+		//do {
+		//    let jsonData = try JSONSerialization.data(withJSONObject: dict, options: .prettyPrinted)     
+		response.setBody(json: dict)
+		//} catch let error as NSError {
+		//    print(error)
+		//}
+	}else {
+		errorResponse(response: response)
+	}
+
 	//create new user in database
 	//respond to user
 }
