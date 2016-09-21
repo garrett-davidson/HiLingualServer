@@ -95,7 +95,7 @@ func createUserWith(token: String) -> User {
         print("no rows found")
         return newUser
     }
-    
+
     results.forEachRow { row in
         // each row is a of type MySQL.MySQL.Results.Type.Element
         // which is just a typealias for [String]

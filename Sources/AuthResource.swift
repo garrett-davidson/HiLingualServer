@@ -74,11 +74,11 @@ func checkGoogleAuthority(_ token: String) -> Bool {
     }
     do {
 	     var response: URLResponse?
-    
+
         let dataVal = try NSURLConnection.sendSynchronousRequest(request1, returning: &response)
             do {
             	if let httpResponse = response as? HTTPURLResponse {
-	                if httpResponse.statusCode == 200{
+	                if httpResponse.statusCode == 200 {
 	            		return true
 	            	} else {
 	            		return false
@@ -101,7 +101,7 @@ func checkFacebookAuthority(_ token: String) -> Bool {
     }
     do {
 	    var response: URLResponse?
-    
+
         let dataVal = try NSURLConnection.sendSynchronousRequest(request1, returning: &response)
             do {
                 if let httpResponse = response as? HTTPURLResponse {
@@ -135,8 +135,8 @@ func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic:
 	   		badRequestResponse(response: response)
 	   		return
     	}
-    	loginUserWith(authAccountId: authID,sessionId: token)
-	}else {
+    	loginUserWith(authAccountId: authID, sessionId: token)
+	} else {
 		errorResponse(response: response)
 	}
 }
@@ -157,8 +157,8 @@ func logoutWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic
 	   		badRequestResponse(response: response)
 	   		return
     	}
-    	logoutUserWith(authAccountId: authID,sessionId: token)
-	}else {
+    	logoutUserWith(authAccountId: authID, sessionId: token)
+	} else {
 		errorResponse(response: response)
 	}
 }
@@ -179,7 +179,7 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
 		} catch {
 			print(error)
 		}
-	}else {
+	} else {
 		unauthorizedResponse(response: response)
 	}
 
