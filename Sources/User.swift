@@ -55,7 +55,7 @@ class User {
 		return self.sessionToken
 	}
 	func setUserId(newId: Int) {
-		if (self.userId == 0) {
+		if self.userId == 0 {
 			self.userId = newId
 		}
 	}
