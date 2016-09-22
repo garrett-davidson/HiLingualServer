@@ -33,6 +33,8 @@ routes.add(method: .get, uri: "/user/**", handler: handleUser)
 routes.add(method: .post, uri: "/auth/**", handler: handleAuth)
 routes.add(method: .get, uri: "/asset/**", handler: handleAsset)
 routes.add(method: .get, uri: "/chat/**", handler: handleChat)
+routes.add(method: .post, uri: "/picture", handler: handlePicture)
+
 
 
 // Add the routes to the server.

@@ -91,13 +91,14 @@ func addChatToTable(auth: String, recipient: Int, message: String) {
         print("Error inserting into hl_chat_messages")
         return
     }
-
+    print("added message to table")
 }
 func addChatToTableAudio(auth: String, recipient: Int, audio: String) {
     guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,1,\(recipient),NULL,NULL,\"\(audio)\");") else {
-        print("Error inserting into hl_chat_messages")
+        print("Error inserting into hl_chat_messages with audio")
         return
     }
+    print("added to audio to table")
 
 }
 func createUserWith(token: String) -> User? {
