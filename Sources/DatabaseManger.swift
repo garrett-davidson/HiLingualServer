@@ -21,9 +21,11 @@ let createMessagesTableQuery = "CREATE TABLE IF NOT EXISTS \(messagesTable)(" +
 "audio VARCHAR(500));"
 let createUsersTableQuery = "CREATE TABLE IF NOT EXISTS \(usersTable)(" +
     "user_id BIGINT UNIQUE PRIMARY KEY AUTO_INCREMENT, " +
-    "user_name TINYTEXT, " +
-    "birth_date DATE, " +
-    "known_languages LONGTEXT, " +
+    "name TINYTEXT, " +
+    "displayName TINYTEXT, " +
+    "bio LONGTEXT, " +
+    "gender TINYTEXT, " +
+    "birthdate DATETIME, " +
     "session_token LONGTEXT, " +
 "learning_languages LONGTEXT);"
 let createFacebookTableQuery = "CREATE TABLE IF NOT EXISTS \(facebookTable)(" +
@@ -101,6 +103,16 @@ func addChatToTableAudio(auth: String, recipient: Int, audio: String) {
     print("added to audio to table")
 
 }
+
+func overwriteUserData(user: User) {
+    guard dataMysql.query(statement: "UPDATE hl_users VALUE (\(user.getUserId()),\(user.getName()),\(user.getDisplayName()),\(user.getBio()),\(user.getGender()),\(user.getBirthdate()),NULL,NULL);") else {
+        print("Error updating user")
+        return
+    }
+    print("updated user to table")
+}
+
+
 func createUserWith(token: String) -> User? {
     let newUser = User()
     guard dataMysql.query(statement: "INSERT INTO hl_users (session_token) VALUES(\"\(token)\");") else {

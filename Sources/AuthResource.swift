@@ -12,29 +12,24 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 	guard var urlString = request.urlVariables[routeTrailingWildcardKey] else {
 		return
 	}
-
-	//deserialize request JSON body to Dictionary
+	var urlStringArray = urlString.characters.split{$0 == "/"}.map(String.init)
 	let jsonString: String! = request.postBodyString
 	do {
 		guard let result = try jsonString.jsonDecode() as? Dictionary<String, AnyObject> else {
 			print("invalid json string")
 			return
 		}
-
 		//validate request
 		guard let _ = request.header(HTTPRequestHeader.Name.authorization) else {
 			print("no auth parameter")
 			unauthorizedResponse(response: response)
 	        return
 	    }
-		//parse uri
-		urlString.remove(at: urlString.startIndex)
-		print(urlString)
-		if urlString == "login" {
+		if urlStringArray[0] == "login" {
 			loginWith(request: request, response, result)
-		} else if urlString == "register" {
+		} else if urlStringArray[0] == "register" {
 			registerWith(request: request, response, result)
-		} else if urlString == "logout" {
+		} else if urlStringArray[0] == "logout" {
 			logoutWith(request: request, response, result)
 		}
 		response.completed()

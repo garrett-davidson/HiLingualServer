@@ -28,6 +28,16 @@ class User {
 		self.authorityAccountId = authorityAccountId
 		self.sessionToken = sessionToken
 	}
+	init(newUserId: Int, newName: String, newDisplayName: String, newBio: String, newGender: Gender, newBirthdate: Int) {
+		self.userId = newUserId
+		self.name = newName
+		self.displayName = newDisplayName
+		self.bio = newBio
+		self.gender = newGender
+		self.birthdate = newBirthdate
+		self.authorityAccountId = "newAccountId"
+		self.sessionToken = "newSessionToken"
+	}
 
 
 	func getUserId() -> Int {
