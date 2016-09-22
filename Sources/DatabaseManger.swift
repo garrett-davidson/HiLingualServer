@@ -118,7 +118,7 @@ func createUserWith(token: String) -> User? {
     }
     guard dataMysql.query(statement: "SELECT MAX(user_id) from hl_users;") else {
         print("Mysql error")
-        return newUser
+        return nil
     }
     guard let results = dataMysql.storeResults() else {
         return nil
@@ -140,7 +140,7 @@ func createUserWith(token: String) -> User? {
     guard let newUserId = Int(col2) else {
         return nil
     }
-    newUser.setUserId(newId: newUserId)
+    newUser.setUserId(newUserId: newUserId)
     return newUser
 }
 func logoutUserWith(authAccountId: String, sessionId: String) {
@@ -148,4 +148,76 @@ func logoutUserWith(authAccountId: String, sessionId: String) {
 }
 func loginUserWith(authAccountId: String, sessionId: String) {
     print("logging out user")
+}
+func convertRowToUserWith(row: [String?]) -> User? {
+    let newUser = User()
+    guard row.count == 8 else {
+        return nil
+    }
+    //userid
+    guard let a = row[0], let userId = Int(a) else {
+        return nil
+    }
+    newUser.setUserId(newUserId: userId)
+    guard let name = row[1] else {
+        return nil
+    }
+    newUser.setName(newName: name)
+    guard let displayName = row[2] else {
+        return nil
+    }
+    newUser.setDisplayName(newDisplayName: displayName)
+    guard let bio = row[3] else {
+        return nil
+    }
+    newUser.setBio(newBio: bio)
+    guard let genderString = row[4] else {
+        return nil
+    }
+    var tempGender: Gender
+    if genderString == "FEMALE" {
+        tempGender = Gender.FEMALE
+    } else if genderString == "MALE" {
+        tempGender = Gender.MALE
+    } else {
+        tempGender = Gender.NOTSET
+    }
+    newUser.setGender(newGender: tempGender)
+    guard  let b = row[5], let birthdate = Int(b) else {
+        return nil
+    }
+    newUser.setBirthdate(newBirthdate: birthdate)
+    guard let authAccountId = row[6] else {
+        return nil
+    }
+    newUser.setAuthorityAccountId(newAuthorityAccountId: authAccountId)
+    guard  let sessionToken = row[7] else {
+        return nil
+    }
+    newUser.setSessionToken(newSessionToken: sessionToken)
+    return newUser
+
+}
+func isValidSession(userId: Int, sessionToken: String) -> User? {
+    guard dataMysql.query(statement: "SELECT * from hl_users WHERE user_id = \(userId)") else {
+        return nil
+    }
+    guard let results = dataMysql.storeResults() else {
+        return nil
+    }
+    guard results.numRows() == 1 else {
+        return nil
+    }
+    guard let row = results.next() else {
+        return nil
+    }
+    guard let tempUser = convertRowToUserWith(row: row) else {
+        return nil
+    }
+    if tempUser.getSessionToken() == sessionToken {
+        return tempUser
+    } else {
+        return nil
+    }
+
 }
