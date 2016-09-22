@@ -35,6 +35,7 @@ routes.add(method: .post, uri: "/auth/**", handler: handleAuth)
 routes.add(method: .get, uri: "/asset/**", handler: handleAsset)
 routes.add(method: .get, uri: "/chat/**", handler: handleChat)
 routes.add(method: .post, uri: "/picture", handler: handlePicture)
+routes.add(method: .post, uri: "/audio", handler: handleAudio)
 
 
 

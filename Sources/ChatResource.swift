@@ -1,11 +1,13 @@
 import PerfectLib
 import PerfectHTTP
 import AppKit
+import AVFoundation
+import Foundation
 
 func handleChat(request: HTTPRequest, _ response: HTTPResponse) {
     //parse uri and call relevant funtion
     response.setHeader(.contentType, value: "text/html")
-    response.appendBody(string: "<html><title>chat</title><body>Chat resource</body></html>")
+    response.appendBody(string: "<html><title>chat</title><body>Chat resource Message</body></html>")
     sendMessageWith(request: request, response)
     response.completed()
 }
@@ -13,8 +15,16 @@ func handleChat(request: HTTPRequest, _ response: HTTPResponse) {
 func handlePicture(request: HTTPRequest, _ response: HTTPResponse) {
     //parse uri and call relevant funtion
     response.setHeader(.contentType, value: "text/html")
-    response.appendBody(string: "<html><title>picture</title><body>Chat resource</body></html>")
+    response.appendBody(string: "<html><title>picture</title><body>Chat resource Picture</body></html>")
     sendPictureMessageWith(request: request, response)
+    response.completed()
+}
+
+func handleAudio(request: HTTPRequest, _ response: HTTPResponse) {
+    //parse uri and call relevant funtion
+    response.setHeader(.contentType, value: "text/html")
+    response.appendBody(string: "<html><title>Audio</title><body>Chat resource Audio</body></html>")
+    sendAudioMessageWith(request: request, response)
     response.completed()
 }
 
@@ -51,7 +61,7 @@ func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         print("invalid recipient ID")
         return
     }
-    addChatToTable(auth: auth, recipient: recipient, message: message)
+    addMessageToTable(auth: auth, recipient: recipient, message: message)
 }
 
 func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
@@ -86,7 +96,7 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         "fileSize": uploads[0].fileSize,
         "tmpFileName": uploads[0].tmpFileName
         ])
-    guard let image = NSImage(contentsOfFile: uploads[0].tmpFileName) else {
+    guard let _ = NSImage(contentsOfFile: uploads[0].tmpFileName) else {
         print("Invalid Picture")
         return
     }
@@ -106,9 +116,107 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         print("invalid recipient ID")
         return
     }
-    //addChatToTableAudio(auth: auth, recipient: recipient, audio: uploads)
+    if let picture = storePicture(atPath: uploads[0].tmpFileName) {
+        addPictureMessageToTable(auth: auth, recipient: recipient, picture: picture)
+    }
+
 }
 
+func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
+    guard let auth = request.param(name: "auth") else {
+        print("no auth token")
+        invalidMessage(request: request, response)
+        return
+    }
+
+    guard let recipientString = request.param(name: "recipient") else {
+        print("no recipient")
+        invalidMessage(request: request, response)
+        return
+    }
+
+    guard let uploads = request.postFileUploads, uploads.count > 0  else {
+        print("no uploads")
+        return
+    }
+
+    var ary = [[String:Any]]()
+
+    if uploads.count > 1 {
+        print("more than one audio file")
+        invalidMessage(request: request, response)
+        return
+    }
+    ary.append([
+        "fieldName": uploads[0].fieldName,
+        "contentType": uploads[0].contentType,
+        "fileName": uploads[0].fileName,
+        "fileSize": uploads[0].fileSize,
+        "tmpFileName": uploads[0].tmpFileName
+        ])
+    let fileUrl = URL(fileURLWithPath: uploads[0].tmpFileName)
+    do {
+        let _ = try AVAudioPlayer(contentsOf: fileUrl)
+    } catch let error as NSError {
+        print(error)
+    }
+    print("upload")
+    print("auth=\(auth)")
+    print("recipient=\(recipientString)")
+
+    if uploads[0].fileSize > 10000000 {
+        print("Audio is to big")
+        invalidMessage(request: request, response)
+        return
+    }
+
+    guard let recipient = Int(recipientString) else {
+        invalidMessage(request: request, response)
+        print("invalid recipient ID")
+        return
+    }
+    if let audio = storePicture(atPath: uploads[0].tmpFileName) {
+        addAudioMessageToTable(auth: auth, recipient: recipient, audio: audio)
+    }
+
+}
+
+func storePicture(atPath srcPath: String) -> String? {
+    do {
+        let fileManager = FileManager.default
+        guard let fileName = srcPath.components(separatedBy: "/").last else {
+            print("no path")
+            return nil
+        }
+        let path = fileManager.currentDirectoryPath + "/Resources/Pictures/"
+        try fileManager.createDirectory(atPath: path, withIntermediateDirectories: true)
+        try fileManager.moveItem(atPath: srcPath, toPath: path + fileName)
+        return path + fileName
+    } catch let error as NSError {
+        print("could not store picture")
+        print(error)
+        return nil
+    }
+}
+
+func storeAudio(atPath srcPath: String) -> String? {
+    do {
+        let fileManager = FileManager.default
+        guard let fileName = srcPath.components(separatedBy: "/").last else {
+            print("no path")
+            return nil
+        }
+        let path = fileManager.currentDirectoryPath + "/Resources/Audio/"
+
+        try fileManager.createDirectory(atPath: path, withIntermediateDirectories: true)
+        try fileManager.moveItem(atPath: srcPath, toPath: path + fileName)
+        return path + fileName
+    } catch let error as NSError {
+        print("could not store Audio")
+        print(error)
+        return nil
+    }
+}
 
 func invalidMessage(request: HTTPRequest, _ response: HTTPResponse) {
     response.setHeader(.contentType, value: "text/html")

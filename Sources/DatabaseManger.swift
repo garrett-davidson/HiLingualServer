@@ -18,6 +18,7 @@ let createMessagesTableQuery = "CREATE TABLE IF NOT EXISTS \(messagesTable)(" +
     "receiver_id BIGINT, " +
     "message VARCHAR(500), " +
     "edited_message VARCHAR(500), " +
+    "picture VARCHAR(500), " +
 "audio VARCHAR(500));"
 let createUsersTableQuery = "CREATE TABLE IF NOT EXISTS \(usersTable)(" +
     "user_id BIGINT UNIQUE PRIMARY KEY AUTO_INCREMENT, " +
@@ -88,19 +89,27 @@ func setupMysql() {
         }
     }
 }
-func addChatToTable(auth: String, recipient: Int, message: String) {
-    guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,1,\(recipient),\"\(message)\",NULL,NULL);") else {
+func addMessageToTable(auth: String, recipient: Int, message: String) {
+    guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,1,\(recipient),\"\(message)\",NULL,NULL,NULL);") else {
         print("Error inserting into hl_chat_messages")
         return
     }
     print("added message to table")
 }
-func addChatToTableAudio(auth: String, recipient: Int, audio: String) {
-    guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,1,\(recipient),NULL,NULL,\"\(audio)\");") else {
+func addAudioMessageToTable(auth: String, recipient: Int, audio: String) {
+    guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,1,\(recipient),NULL,NULL,NULL,\"\(audio)\");") else {
         print("Error inserting into hl_chat_messages with audio")
         return
     }
-    print("added to audio to table")
+    print("added to audio message to table")
+
+}
+func addPictureMessageToTable(auth: String, recipient: Int, picture: String) {
+    guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,1,\(recipient),NULL,NULL,\"\(picture)\",NULL);") else {
+        print("Error inserting into hl_chat_messages with audio")
+        return
+    }
+    print("added to picture message to table")
 
 }
 
