@@ -35,40 +35,49 @@ let createGoogleTableQuery = "CREATE TABLE IF NOT EXISTS hl_google_data(" +
 let dataMysql = MySQL()
 
 func setupMysql() {
-    guard dataMysql.connect(host: testHost, user: testUser, password: testPassword ) else {
+    print("Connecting to mysql database...")
+    guard dataMysql.connect(host: testHost, user: testUser, password: testPassword )  else {
         print("Failure connecting to data server \(testHost)")
         return
     }
+    
 
     if !dataMysql.selectDatabase(named: testSchema) {
-
+        print("Creating database \(testSchema)")
         guard dataMysql.query(statement: "CREATE DATABASE \(testSchema)") else {
-            print("Error creating db")
+            print("Error creating databse \(testSchema)")
             return
         }
 
+        print("Using database \(testSchema)")
         guard dataMysql.query(statement: "USE \(testSchema) ") else {
-            print("Error creating table1")
+            print("Error connecting to \(testSchema)")
             return
         }
-
+        print("Creating table \(createUsersTableQuery)")
         guard dataMysql.query(statement: "\(createUsersTableQuery)") else {
-            print("Error creating user table")
+            print("Error creating table \(createUsersTableQuery)")
             return
         }
-
+        print("Creating table \(createMessagesTableQuery)")
         guard dataMysql.query(statement: "\(createMessagesTableQuery)") else {
-            print("Error creating message table")
+            print("Error creating table ")
             return
         }
-
+        print("Creating table \(createFacebookTableQuery)")
         guard dataMysql.query(statement: "\(createFacebookTableQuery)") else {
             print("Error creating facebook auth table")
             return
         }
-
+        print("Creating table \(createGoogleTableQuery)")
         guard dataMysql.query(statement: "\(createGoogleTableQuery)") else {
             print("Error creating google auth table")
+            return
+        }
+    } else {
+        print("Using database \(testSchema)")
+        guard dataMysql.query(statement: "USE \(testSchema) ") else {
+            print("Error connecting to \(testSchema)")
             return
         }
     }
