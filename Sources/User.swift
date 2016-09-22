@@ -54,7 +54,11 @@ class User {
 	func getSessionToken() -> Int {
 		return self.sessionToken
 	}
-
+	func setUserId(newId: Int) {
+		if (self.userId == 0) {
+			self.userId = newId
+		}
+	}
 	func setName(newName: String) {
 		self.name = newName
 	}
