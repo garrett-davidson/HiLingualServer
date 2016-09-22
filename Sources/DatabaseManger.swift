@@ -80,6 +80,13 @@ func addChatToTable(auth: String, recipient: Int, message: String) {
     }
 
 }
+func addChatToTableAudio(auth: String, recipient: Int, audio: String) {
+    guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,1,\(recipient),NULL,NULL,\"\(audio)\");") else {
+        print("Error inserting into hl_chat_messages")
+        return
+    }
+
+}
 func createUserWith(token: String) -> User {
     let newUser = User()
     guard dataMysql.query(statement: "INSERT INTO hl_users (session_token) VALUES(\"\(token)\");") else {
