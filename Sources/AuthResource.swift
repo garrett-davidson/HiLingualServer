@@ -22,7 +22,7 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 		}
 
 		//validate request
-		guard let auth = request.header(HTTPRequestHeader.Name.authorization) else {
+		guard let _ = request.header(HTTPRequestHeader.Name.authorization) else {
 			print("no auth parameter")
 			unauthorizedResponse(response: response)
 	        return
@@ -68,26 +68,21 @@ func verifyAuthToken(request: HTTPRequest, _ response: HTTPResponse, _ requestBo
 }
 func checkGoogleAuthority(_ token: String) -> Bool {
     let scriptURL = "https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=\(token)"
-    let myUrl = URL(string: scriptURL)
-    guard let request1: URLRequest = URLRequest(url: myUrl!) else {
+    guard let myUrl = URL(string: scriptURL) else {
     	return false
     }
+    let request1: URLRequest = URLRequest(url: myUrl)
     do {
 	     var response: URLResponse?
 
-        let dataVal = try NSURLConnection.sendSynchronousRequest(request1, returning: &response)
-            do {
-            	if let httpResponse = response as? HTTPURLResponse {
-	                if httpResponse.statusCode == 200 {
-	            		return true
-	            	} else {
-	            		return false
-	            	}
-	            }
-            } catch let error as NSError {
-                print(error.localizedDescription)
-            }
-
+	    try NSURLConnection.sendSynchronousRequest(request1, returning: &response)
+    	if let httpResponse = response as? HTTPURLResponse {
+            if httpResponse.statusCode == 200 {
+        		return true
+        	} else {
+        		return false
+        	}
+        }
     } catch let error as NSError {
          print(error.localizedDescription)
     }
@@ -95,25 +90,21 @@ func checkGoogleAuthority(_ token: String) -> Bool {
 }
 func checkFacebookAuthority(_ token: String) -> Bool {
     let scriptURL = "https://graph.facebook.com/me?access_token=\(token)"
-    let myUrl = URL(string: scriptURL)
-    guard let request1: URLRequest = URLRequest(url: myUrl!) else {
+    guard let myUrl = URL(string: scriptURL) else {
     	return false
     }
+    let request1: URLRequest = URLRequest(url: myUrl)
     do {
 	    var response: URLResponse?
 
-        let dataVal = try NSURLConnection.sendSynchronousRequest(request1, returning: &response)
-            do {
-                if let httpResponse = response as? HTTPURLResponse {
-                	if httpResponse.statusCode == 200 {
-	            		return true
-	            	} else {
-	            		return false
-	            	}
-            	}
-            } catch let error as NSError {
-                print(error.localizedDescription)
-            }
+        try NSURLConnection.sendSynchronousRequest(request1, returning: &response)
+        if let httpResponse = response as? HTTPURLResponse {
+        	if httpResponse.statusCode == 200 {
+        		return true
+        	} else {
+        		return false
+        	}
+        }
     } catch let error as NSError {
          print(error.localizedDescription)
     }
@@ -172,8 +163,11 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
 	   		print("no auth token sent")
 	   		return
     	}
-		var user = createUserWith(token: token)
-		var dict = ["userId": user.getUserId(), "sessionId": user.getSessionToken()]
+		guard let user = createUserWith(token: token) else {
+			print("database error")
+			return
+		}
+		let dict = ["userId": user.getUserId(), "sessionId": user.getSessionToken()]
 		do {
 			try response.setBody(json: dict)
 		} catch {

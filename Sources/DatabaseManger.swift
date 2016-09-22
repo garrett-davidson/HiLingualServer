@@ -5,8 +5,12 @@ let testUser = "test"
 
 let testPassword = "password"
 let testSchema = "HiLingualDB"
+let messagesTable = "hl_chat_messages"
+let usersTable = "hl_users"
+let facebookTable = "hl_facebook_data"
+let googleTable = "hl_google_data"
 
-let createMessagesTableQuery = "CREATE TABLE IF NOT EXISTS hl_chat_messages(" +
+let createMessagesTableQuery = "CREATE TABLE IF NOT EXISTS \(messagesTable)(" +
     "message_id BIGINT UNIQUE PRIMARY KEY AUTO_INCREMENT, " +
     "sent_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
     "edit_timestamp DATETIME, " +
@@ -15,19 +19,19 @@ let createMessagesTableQuery = "CREATE TABLE IF NOT EXISTS hl_chat_messages(" +
     "message VARCHAR(500), " +
     "edited_message VARCHAR(500), " +
 "audio VARCHAR(500));"
-let createUsersTableQuery = "CREATE TABLE IF NOT EXISTS hl_users(" +
+let createUsersTableQuery = "CREATE TABLE IF NOT EXISTS \(usersTable)(" +
     "user_id BIGINT UNIQUE PRIMARY KEY AUTO_INCREMENT, " +
     "user_name TINYTEXT, " +
     "birth_date DATE, " +
     "known_languages LONGTEXT, " +
     "session_token LONGTEXT, " +
 "learning_languages LONGTEXT);"
-let createFacebookTableQuery = "CREATE TABLE IF NOT EXISTS hl_facebook_data(" +
+let createFacebookTableQuery = "CREATE TABLE IF NOT EXISTS \(facebookTable)(" +
     "user_id BIGINT UNIQUE PRIMARY KEY, " +
     "account_id VARCHAR(255), " +
 "token TEXT);"
 
-let createGoogleTableQuery = "CREATE TABLE IF NOT EXISTS hl_google_data(" +
+let createGoogleTableQuery = "CREATE TABLE IF NOT EXISTS \(googleTable)a(" +
     "user_id BIGINT UNIQUE PRIMARY KEY, " +
     "account_id VARCHAR(255), " +
 "token TEXT);"
@@ -35,40 +39,49 @@ let createGoogleTableQuery = "CREATE TABLE IF NOT EXISTS hl_google_data(" +
 let dataMysql = MySQL()
 
 func setupMysql() {
-    guard dataMysql.connect(host: testHost, user: testUser, password: testPassword ) else {
+    print("Connecting to mysql database...")
+    guard dataMysql.connect(host: testHost, user: testUser, password: testPassword )  else {
         print("Failure connecting to data server \(testHost)")
         return
     }
 
+
     if !dataMysql.selectDatabase(named: testSchema) {
-
+        print("Creating database \(testSchema)")
         guard dataMysql.query(statement: "CREATE DATABASE \(testSchema)") else {
-            print("Error creating db")
+            print("Error creating databse \(testSchema)")
             return
         }
 
+        print("Using database \(testSchema)")
         guard dataMysql.query(statement: "USE \(testSchema) ") else {
-            print("Error creating table1")
+            print("Error connecting to \(testSchema)")
             return
         }
-
+        print("Creating table \(createUsersTableQuery)")
         guard dataMysql.query(statement: "\(createUsersTableQuery)") else {
-            print("Error creating user table")
+            print("Error creating table \(createUsersTableQuery)")
             return
         }
-
+        print("Creating table \(createMessagesTableQuery)")
         guard dataMysql.query(statement: "\(createMessagesTableQuery)") else {
-            print("Error creating message table")
+            print("Error creating table ")
             return
         }
-
+        print("Creating table \(createFacebookTableQuery)")
         guard dataMysql.query(statement: "\(createFacebookTableQuery)") else {
             print("Error creating facebook auth table")
             return
         }
-
+        print("Creating table \(createGoogleTableQuery)")
         guard dataMysql.query(statement: "\(createGoogleTableQuery)") else {
             print("Error creating google auth table")
+            return
+        }
+    } else {
+        print("Using database \(testSchema)")
+        guard dataMysql.query(statement: "USE \(testSchema) ") else {
+            print("Error connecting to \(testSchema)")
             return
         }
     }
@@ -88,32 +101,37 @@ func addChatToTableAudio(auth: String, recipient: Int, audio: String) {
     print("added to audio to table")
 
 }
-func createUserWith(token: String) -> User {
+func createUserWith(token: String) -> User? {
     let newUser = User()
     guard dataMysql.query(statement: "INSERT INTO hl_users (session_token) VALUES(\"\(token)\");") else {
         print("Error inserting into hl_users")
         return newUser
     }
-    guard dataMysql.query(statement: "SELECT LAST_INSERT_ROWID();") else {
+    guard dataMysql.query(statement: "SELECT MAX(user_id) from hl_users;") else {
         print("Mysql error")
         return newUser
     }
-    let results = dataMysql.storeResults()!
+    guard let results = dataMysql.storeResults() else {
+        return nil
+    }
     guard results.numRows() == 1 else {
         print("no rows found")
         return newUser
     }
 
-    results.forEachRow { row in
-        // each row is a of type MySQL.MySQL.Results.Type.Element
-        // which is just a typealias for [String]
-        print("fetched: \(row)")
-        let content = row[0] // element 0 will be Content because it was the first (and only) colum in our query
-        print("Id:")
-        print(content)
-        return
-
+    guard let row = results.next() else {
+        return nil
     }
+    guard let col1 = row.first else {
+        return nil
+    }
+    guard let col2 = col1 else {
+        return nil
+    }
+    guard let newUserId = Int(col2) else {
+        return nil
+    }
+    newUser.setUserId(newId: newUserId)
     return newUser
 }
 func logoutUserWith(authAccountId: String, sessionId: String) {
