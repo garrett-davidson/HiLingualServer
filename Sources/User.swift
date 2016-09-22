@@ -68,4 +68,7 @@ class User {
 	func setBio(newBio: String) {
 		self.bio = newBio
 	}
+	func setSessionToken(newSessionToken: String) {
+		self.sessionToken = newSessionToken
+	}
 }
