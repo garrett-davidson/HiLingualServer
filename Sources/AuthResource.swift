@@ -167,7 +167,7 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
 			print("database error")
 			return
 		}
-		let dict = ["userId": user.getUserId(), "sessionId": user.getSessionToken()]
+		let dict: [String: Any] = ["userId": user.getUserId(), "sessionId": user.getSessionToken()]
 		do {
 			try response.setBody(json: dict)
 		} catch {
