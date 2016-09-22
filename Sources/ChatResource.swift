@@ -67,13 +67,13 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         return
     }
 
-    guard let uploads = request.postFileUploads , uploads.count > 0  else {
+    guard let uploads = request.postFileUploads, uploads.count > 0  else {
         print("no uploads")
         return
     }
-    
+
     var ary = [[String:Any]]()
-    
+
     if uploads.count > 1 {
         print("more than one picture")
         invalidMessage(request: request, response)
@@ -94,13 +94,13 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     print("upload")
     print("auth=\(auth)")
     print("recipient=\(recipientString)")
-    
+
     if uploads[0].fileSize > 10000000 {
         print("picture is to big")
         invalidMessage(request: request, response)
         return
     }
-    
+
     guard let recipient = Int(recipientString) else {
         invalidMessage(request: request, response)
         print("invalid recipient ID")
