@@ -16,7 +16,7 @@ class ChatResourceTests: XCTestCase {
         let testDatabase = "TestHiLingualDB"
 
         guard connectToMySql() else {
-            print("Cannot loging to mysql")
+            print("Cannot login to mysql")
             XCTFail()
             return
         }
