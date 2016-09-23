@@ -4,7 +4,6 @@ let testHost = "127.0.0.1"
 let testUser = "test"
 
 let testPassword = "password"
-let testSchema = "HiLingualDB"
 let messagesTable = "hl_chat_messages"
 let usersTable = "hl_users"
 let facebookTable = "hl_facebook_data"
@@ -45,23 +44,27 @@ func closeDatabase() {
     dataMysql.close()
 }
 
-func setupMysql() {
+func connectToMySql() -> Bool {
     print("Connecting to mysql database...")
-    guard dataMysql.connect(host: testHost, user: testUser, password: testPassword )  else {
+    guard dataMysql.connect(host: testHost, user: testUser, password: testPassword) else {
         print("Failure connecting to data server \(testHost)")
-        return
+        return false
     }
 
-    if !dataMysql.selectDatabase(named: testSchema) {
-        print("Creating database \(testSchema)")
-        guard dataMysql.query(statement: "CREATE DATABASE \(testSchema)") else {
-            print("Error creating databse \(testSchema)")
+    return true
+}
+
+func setupMysql(forSchema schema: String) {
+    if !dataMysql.selectDatabase(named: schema) {
+        print("Creating database \(schema)")
+        guard dataMysql.query(statement: "CREATE DATABASE \(schema)") else {
+            print("Error creating databse \(schema)")
             return
         }
 
-        print("Using database \(testSchema)")
-        guard dataMysql.query(statement: "USE \(testSchema) ") else {
-            print("Error connecting to \(testSchema)")
+        print("Using database \(schema)")
+        guard dataMysql.query(statement: "USE \(schema) ") else {
+            print("Error connecting to \(schema)")
             return
         }
         print("Creating table \(createUsersTableQuery)")
@@ -85,13 +88,14 @@ func setupMysql() {
             return
         }
     } else {
-        print("Using database \(testSchema)")
-        guard dataMysql.query(statement: "USE \(testSchema) ") else {
-            print("Error connecting to \(testSchema)")
+        print("Using database \(schema)")
+        guard dataMysql.query(statement: "USE \(schema) ") else {
+            print("Error connecting to \(schema)")
             return
         }
     }
 }
+
 func addMessageToTable(auth: String, recipient: Int, message: String) {
     guard let encodedMessage = message.toBase64() else {
         print("Unable to encode message")
@@ -103,6 +107,7 @@ func addMessageToTable(auth: String, recipient: Int, message: String) {
     }
     print("added message to table")
 }
+
 func addAudioMessageToTable(auth: String, recipient: Int, audio: String) {
     guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,1,\(recipient),NULL,NULL,NULL,\"\(audio)\");") else {
         print("Error inserting into hl_chat_messages with audio")

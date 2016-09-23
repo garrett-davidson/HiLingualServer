@@ -51,7 +51,11 @@ server.addRoutes(routes)
 // Set a listen port of 8180
 server.serverPort = 8180
 
-setupMysql()
+guard connectToMySql() else {
+    print("Unable to log in to mysql")
+    exit(1)
+}
+setupMysql(forSchema: "HiLingualDB")
 
 // Gather command line options and further configure the server.
 // Run the server with --help to see the list of supported arguments.

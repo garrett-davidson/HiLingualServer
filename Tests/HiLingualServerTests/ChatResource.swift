@@ -5,30 +5,47 @@ import PerfectHTTP
 class ChatResourceTests: XCTestCase {
     let invalidMessageBody = "<html><title>chat</title><body>Invalid message!</body></html>"
     let validMessageBody = "<html><title>chat</title><body>Chat resource Message</body></html>"
+    let validAuthToken = "1234567890"
+    let validUserId = "1"
+
+    override func setUp() {
+        super.setUp()
+        // Create user with valid id, auth token
+        let testDatabase = "TestHiLingualDB"
+
+        guard connectToMySql() else {
+            print("Cannot loging to mysql")
+            XCTFail()
+            return
+        }
+        let _ = dataMysql.query(statement: "drop database \(testDatabase);")
+        setupMysql(forSchema: testDatabase)
+        guard dataMysql.query(statement: "INSERT INTO hl_users (session_token) VALUES(\"testsessiontoken\");") else {
+            print("Error inserting into hl_users")
+            XCTFail()
+            return
+        }
+
+    }
 
     func testSendMessageWithRequest() {
         let request = ShimHTTPRequest()
         let response = ShimHTTPResponse()
 
-        let validAuthToken = "1234567890"
-        let validUserId = "1"
-
-        //TEXT MESSAGE
-
         // Empty request
-        sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody)
+        sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody, failureString: "Allowed empty request")
 
         // Successful request
         request.postParams = [("auth", validAuthToken),
                               ("recipient", validUserId),
-                              ("message", String(repeating: "a", count: 300))]
-        sendTestChatWith(request: request, response: response, expectedResponseString: validMessageBody)
+                              ("message", "a")]
+        sendTestChatWith(request: request, response: response, expectedResponseString: validMessageBody, failureString: "Did not send successful request")
 
         // Too long message
         request.postParams = [("auth", validAuthToken),
                               ("recipient", validUserId),
                               ("message", String(repeating: "a", count: 501))]
-        sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody)
+        sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody, failureString: "Allowed too long message")
 
         // Invalid session token
 
@@ -36,13 +53,13 @@ class ChatResourceTests: XCTestCase {
         request.postParams = [("auth", validAuthToken),
                               ("recipient", "fdsa"),
                               ("message", "a")]
-        sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody)
+        sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody, failureString: "Allowed sending to invalid recipient")
 
         // Nonexistent recipient
         request.postParams = [("auth", validAuthToken),
                               ("recipient", "3"),
                               ("message", "a")]
-        sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody)
+        sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody, failureString: "Allowed sending to nonexistent recipient")
 
         // Empty message
         request.postParams = [("auth", validAuthToken),
@@ -52,8 +69,7 @@ class ChatResourceTests: XCTestCase {
 
         // No message
         request.postParams = [("auth", validAuthToken),
-                              ("recipient", "3"),
-                              ("message", "")]
+                              ("recipient", "3")]
         sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody)
 
         //PICTURE MESSAGE
@@ -110,12 +126,12 @@ class ChatResourceTests: XCTestCase {
         // No audio
     }
 
-    func sendTestChatWith(request: ShimHTTPRequest, response: ShimHTTPResponse, expectedResponseString: String) {
+    func sendTestChatWith(request: ShimHTTPRequest, response: ShimHTTPResponse, expectedResponseString: String, failureString: String) {
         handleChat(request: request, response)
         guard let body = response.body else {
-            XCTFail("Response has no body")
+            XCTFail("Test failure: Response has no body")
             return
         }
-        XCTAssertEqual(body, expectedResponseString)
+        XCTAssertEqual(body, expectedResponseString, "Test failure: " + failureString)
     }
 }
