@@ -1,4 +1,4 @@
-import PerfectLib
+import PerfectLibe
 import PerfectHTTP
 
 func handleUser(request: HTTPRequest, _ response: HTTPResponse) {
@@ -81,41 +81,35 @@ func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
 
 func editUserInfo(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>) {
     print("Editing User")
-    // print(requestBodyDic["userId"])
-    // print(requestBodyDic["name"])
-    // print(requestBodyDic["displayName"])
-    // print(requestBodyDic["bio"])
-    // print(requestBodyDic["gender"])
-    // print(requestBodyDic["birthdate"])
     guard let userId = requestBodyDic["userId"] as? Int else {
-	print("bad request")
-	badRequestResponse(response: response)
-	return
+    	print("bad request")
+    	badRequestResponse(response: response)
+    	return
     }
     guard let name = requestBodyDic["name"] as? String else {
-	print("bad request")
-	badRequestResponse(response: response)
-	return
+    	print("bad request")
+    	badRequestResponse(response: response)
+    	return
     }
     guard let displayName = requestBodyDic["displayName"] as? String else {
-	print("bad request")
-	badRequestResponse(response: response)
-	return
+    	print("bad request")
+    	badRequestResponse(response: response)
+    	return
     }
     guard let bio = requestBodyDic["bio"] as? String else {
-	print("bad request")
-	badRequestResponse(response: response)
-	return
+    print("bad request")
+    	badRequestResponse(response: response)
+    	return
     }
     guard let gender = requestBodyDic["gender"] as? Gender else {
-	print("bad request")
-	badRequestResponse(response: response)
-	return
+    	print("bad request")
+    	badRequestResponse(response: response)
+    	return
     }
     guard let birthdate = requestBodyDic["birthdate"] as? Int else {
-	print("bad request")
-	badRequestResponse(response: response)
-	return
+    	print("bad request")
+    	badRequestResponse(response: response)
+    	return
     }
     let user = User(newUserId: userId, newName: name, newDisplayName: displayName, newBio: bio, newGender: gender, newBirthdate: birthdate)
 
@@ -123,6 +117,6 @@ func editUserInfo(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
     if verifyAuthToken(request: request, response, requestBodyDic) {
     	overwriteUserData(user: user)
     } else {
-	errorResponse(response: response)
+	   errorResponse(response: response)
     }
 }
