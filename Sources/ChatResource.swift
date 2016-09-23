@@ -209,7 +209,7 @@ func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
 
 func storePicture(atPath srcPath: String) -> String? {
     var count = 0
-    
+
     while true {
         do {
             let fileManager = FileManager.default
@@ -219,7 +219,7 @@ func storePicture(atPath srcPath: String) -> String? {
             }
             let path = fileManager.currentDirectoryPath + "/Resources/Pictures/"
             try fileManager.createDirectory(atPath: path, withIntermediateDirectories: true)
-            
+
             try fileManager.moveItem(atPath: srcPath, toPath: path + fileName + "\(count)")
             return path + fileName + "\(count)"
         } catch let error as NSError {
