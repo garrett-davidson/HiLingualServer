@@ -3,7 +3,7 @@ import PerfectNet
 import PerfectLib
 import PerfectHTTP
 
-// Borrowed from PerfectHTTPRequests.swift
+// Based on from PerfectHTTPRequests.swift
 class ShimHTTPRequest: HTTPRequest {
     var method = HTTPMethod.get
     var path = "/"
@@ -27,6 +27,7 @@ class ShimHTTPRequest: HTTPRequest {
 }
 
 class ShimHTTPResponse: HTTPResponse {
+    public var body: [String: Any]?
     var request: HTTPRequest = ShimHTTPRequest()
     var status: HTTPResponseStatus = .ok
     var isStreaming = false
@@ -38,7 +39,10 @@ class ShimHTTPResponse: HTTPResponse {
     func addCookie(_: PerfectHTTP.HTTPCookie) {}
     func appendBody(bytes: [UInt8]) {}
     func appendBody(string: String) {}
-    func setBody(json: [String:Any]) throws {}
+    func setBody(json: [String:Any]) throws {
+        body = json
+    }
+
     func push(callback: @escaping (Bool) -> ()) {}
     func completed() {}
 }
