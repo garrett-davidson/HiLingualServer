@@ -6,7 +6,7 @@ class AuthResourceTests: XCTestCase {
     let invalidAuthCode = 401
     let invalidRequestCode = 400
     let validErrorCode = 200
-    let validAuthToken = "EAAOcGlfuCWEBABdmliDTLxZA6rylW2DBRcgjWmaOSnmnbsBl4jShscJSf8oRsgHBqhlNRnEWaMRxYPxKKJiY1nH3xgwIpG5TFxXrW3QZCDf14STNJRAkNjT6rVpNAzJkjQa5jiCbBUZBx0GuNaZBO3BeZCkqyYoWl2KAZBIfwKxZC0YxMS85Pwk"
+    let validAuthToken = "EAAOcGlfuCWEBAAAFBYCPHj25mTYVxCAaiT0ClFAXyqnOWjyIOXvkKjkhEHPHNGTGfDYnFV3Gj3eNaLC6ZBydLwO1FtTrGgHfqWloIsfEnZCLya2yMWKAovZBQ61YCorwEshnDqnidYGF1Qzuhn9qGpkZA0Q9F26h3yPozO3oTVNB8eGYdqkI"
     let validUserId = "148313008891070"
 
 
@@ -65,7 +65,7 @@ class AuthResourceTests: XCTestCase {
         sendTestAuthWith(request: request, response: response, expectedResponseCode: invalidAuthCode, failureString: "6")
 
 
-        postBodyString = "{ \"authority\": \"FACEBOOK\",\"authorityAccountId\": \"\(validUserId)\",\"authorityToken\": \(validAuthToken)\"}"
+        postBodyString = "{ \"authority\": \"FACEBOOK\",\"authorityAccountId\": \"\(validUserId)\",\"authorityToken\": \"\(validAuthToken)\"}"
         request.postBodyString = postBodyString
         request.urlVariables[routeTrailingWildcardKey] = "/login"
         sendTestAuthWith(request: request, response: response, expectedResponseCode: validErrorCode, failureString: "7")

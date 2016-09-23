@@ -188,7 +188,7 @@ func logoutUserWith(sessionId: String) -> Bool{
     
 }
 func loginUserWith(authAccountId: String, sessionId: String) -> User? {
-    print("logging out user")
+    print("logging in user")
     guard dataMysql.query(statement: "SELECT * from hl_users WHERE auth_account_id = \(authAccountId)") else {
         return nil
     }
