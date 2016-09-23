@@ -13,10 +13,16 @@ class ChatResourceTests: XCTestCase {
         let validAuthToken = "1234567890"
         let validUserId = "1"
 
+        //TEXT MESSAGE
+        
         // Empty request
         sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody)
 
         // Successful request
+        request.postParams = [("auth", validAuthToken),
+                              ("recipient", validUserId),
+                              ("message", String(repeating: "a", count: 300))]
+        sendTestChatWith(request: request, response: response, expectedResponseString: validMessageBody)
 
         // Too long message
         request.postParams = [("auth", validAuthToken),
@@ -39,8 +45,69 @@ class ChatResourceTests: XCTestCase {
         sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody)
 
         // Empty message
+        request.postParams = [("auth", validAuthToken),
+                              ("recipient", "3"),
+                              ("message", "")]
+        sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody)
 
         // No message
+        request.postParams = [("auth", validAuthToken),
+                              ("recipient", "3"),
+                              ("message", "")]
+        sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody)
+        
+        //PICTURE MESSAGE
+        
+        // Empty request
+        
+        // Successful request
+        
+        // Too large of picture
+        
+        // More than 1 picture
+        
+        // Extra fields
+        
+        // Invalid session token
+        
+        // Invalid recipient
+        
+        // Message to self
+        
+        // Nonexistent recipient
+        
+        // Empty picture
+        
+        // Invalid picture
+        
+        // No picture
+        
+        
+        //AUDIO MESSAGE
+        
+        // Empty request
+        
+        // Successful request
+        
+        // Too large of audio file
+        
+        // More than one audio file
+        
+        // Extra fields
+        
+        // Invalid session token
+        
+        // Invalid recipient
+        
+        // Message to self
+        
+        // Nonexistent recipient
+        
+        // Empty audio file
+        
+        // Invalid audio
+        
+        // No audio
     }
 
     func sendTestChatWith(request: ShimHTTPRequest, response: ShimHTTPResponse, expectedResponseString: String) {

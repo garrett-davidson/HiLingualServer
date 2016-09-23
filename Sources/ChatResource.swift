@@ -42,7 +42,7 @@ func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         return
     }
 
-    guard let message = request.param(name: "message") else {
+    guard let message = request.param(name: "message"), message.characters.count > 0 else {
         print("no message")
         invalidMessage(request: request, response)
         return
@@ -189,7 +189,7 @@ func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
 
     guard let recipient = Int(recipientString) else {
         invalidMessage(request: request, response)
-        print("invalid recipient ID")
+        print("Invalid recipient ID")
         return
     }
 
