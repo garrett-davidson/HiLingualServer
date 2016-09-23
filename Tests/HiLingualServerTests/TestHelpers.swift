@@ -3,7 +3,7 @@ import PerfectNet
 import PerfectLib
 import PerfectHTTP
 
-// Based on from PerfectHTTPRequests.swift
+// Based on PerfectHTTPRequests.swift
 class ShimHTTPRequest: HTTPRequest {
     var method = HTTPMethod.get
     var path = "/"

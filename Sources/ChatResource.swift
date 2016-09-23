@@ -8,6 +8,7 @@ func handleChat(request: HTTPRequest, _ response: HTTPResponse) {
     //parse uri and call relevant funtion
     response.setHeader(.contentType, value: "text/html")
     response.appendBody(string: "<html><title>chat</title><body>Chat resource Message</body></html>")
+    print("Appending body")
     sendMessageWith(request: request, response)
     response.completed()
 }
@@ -48,7 +49,7 @@ func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     }
 
     if message.characters.count > 500 {
-        print("message to long")
+        print("message too long")
         invalidMessage(request: request, response)
         return
     }
