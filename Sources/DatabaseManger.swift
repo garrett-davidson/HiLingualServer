@@ -179,11 +179,39 @@ func createUserWith(token: String) -> User? {
     newUser.setUserId(newUserId: newUserId)
     return newUser
 }
-func logoutUserWith(authAccountId: String, sessionId: String) {
+func logoutUserWith(authAccountId: String, sessionId: String) -> Bool{
     print("logging out")
+    guard dataMysql.query(statement: "UPDATE hl_users SET session_token = \"\" WHERE session_token = \(sessionId)") else {
+        return false
+    }
+    return true
+    
 }
-func loginUserWith(authAccountId: String, sessionId: String) {
+func loginUserWith(authAccountId: String, sessionId: String) -> User{
     print("logging out user")
+    guard dataMysql.query(statement: "SELECT * from hl_users WHERE auth_account_id = \(authAccountId)") else {
+
+    }
+    guard let results = dataMysql.storeResults() else {
+        return nil
+    }
+    guard results.numRows() == 1 else {
+        return nil
+    }
+    guard let row = results.next() else {
+        return nil
+    }
+    guard let tempUser = convertRowToUserWith(row: row) else {
+        return nil
+    }
+    if tempUser.getSessionToken() == sessionToken {
+        guard dataMysql.query(statement: "UPDATE hl_users SET session_token =\(sessionId) WHERE auth_account_id = \(authAccountId)") else {
+            return nil
+        }
+        return tempUser
+    } else {
+        return nil
+    }
 }
 
 func isValid(userId: Int) -> Bool {
