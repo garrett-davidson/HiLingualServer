@@ -65,12 +65,12 @@ class ChatResourceTests: XCTestCase {
         request.postParams = [("auth", validAuthToken),
                               ("recipient", "3"),
                               ("message", "")]
-        sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody)
+        sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody, failureString: "Allowed sending chat with empty message")
 
         // No message
         request.postParams = [("auth", validAuthToken),
                               ("recipient", "3")]
-        sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody)
+        sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody, failureString: "Allowed sening chat with no message")
 
         //PICTURE MESSAGE
 
