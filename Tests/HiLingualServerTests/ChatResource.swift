@@ -14,7 +14,7 @@ class ChatResourceTests: XCTestCase {
         let validUserId = "1"
 
         //TEXT MESSAGE
-        
+
         // Empty request
         sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody)
 
@@ -55,58 +55,58 @@ class ChatResourceTests: XCTestCase {
                               ("recipient", "3"),
                               ("message", "")]
         sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody)
-        
+
         //PICTURE MESSAGE
-        
+
         // Empty request
-        
+
         // Successful request
-        
+
         // Too large of picture
-        
+
         // More than 1 picture
-        
+
         // Extra fields
-        
+
         // Invalid session token
-        
+
         // Invalid recipient
-        
+
         // Message to self
-        
+
         // Nonexistent recipient
-        
+
         // Empty picture
-        
+
         // Invalid picture
-        
+
         // No picture
-        
-        
+
+
         //AUDIO MESSAGE
-        
+
         // Empty request
-        
+
         // Successful request
-        
+
         // Too large of audio file
-        
+
         // More than one audio file
-        
+
         // Extra fields
-        
+
         // Invalid session token
-        
+
         // Invalid recipient
-        
+
         // Message to self
-        
+
         // Nonexistent recipient
-        
+
         // Empty audio file
-        
+
         // Invalid audio
-        
+
         // No audio
     }
 
