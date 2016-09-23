@@ -9,7 +9,6 @@ class ChatResourceTests: XCTestCase {
     let validPictureBody = "<html><title>picture</title><body>Chat resource Picture</body></html>"
     let validAuthToken = "1234567890"
     let validUserId = "1"
-
     override func setUp() {
         super.setUp()
         // Create user with valid id, auth token

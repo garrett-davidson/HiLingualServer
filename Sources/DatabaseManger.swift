@@ -179,7 +179,7 @@ func createUserWith(token: String) -> User? {
     newUser.setUserId(newUserId: newUserId)
     return newUser
 }
-func logoutUserWith(authAccountId: String, sessionId: String) -> Bool {
+func logoutUserWith(sessionId: String) -> Bool{
     print("logging out")
     guard dataMysql.query(statement: "UPDATE hl_users SET session_token = \"\" WHERE session_token = \(sessionId)") else {
         return false
@@ -187,10 +187,10 @@ func logoutUserWith(authAccountId: String, sessionId: String) -> Bool {
     return true
 
 }
-func loginUserWith(authAccountId: String, sessionId: String) -> User {
+func loginUserWith(authAccountId: String, sessionId: String) -> User? {
     print("logging out user")
     guard dataMysql.query(statement: "SELECT * from hl_users WHERE auth_account_id = \(authAccountId)") else {
-
+        return nil
     }
     guard let results = dataMysql.storeResults() else {
         return nil
@@ -204,7 +204,7 @@ func loginUserWith(authAccountId: String, sessionId: String) -> User {
     guard let tempUser = convertRowToUserWith(row: row) else {
         return nil
     }
-    if tempUser.getSessionToken() == sessionToken {
+    if tempUser.getSessionToken() == sessionId {
         guard dataMysql.query(statement: "UPDATE hl_users SET session_token =\(sessionId) WHERE auth_account_id = \(authAccountId)") else {
             return nil
         }
