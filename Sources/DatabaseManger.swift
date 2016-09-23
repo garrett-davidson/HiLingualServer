@@ -180,6 +180,15 @@ func logoutUserWith(authAccountId: String, sessionId: String) {
 func loginUserWith(authAccountId: String, sessionId: String) {
     print("logging out user")
 }
+
+func isValid(userId: Int) -> Bool {
+    guard dataMysql.query(statement: "SELECT * from hl_users WHERE user_id = \(userId)") else {
+        return false
+    }
+
+    return dataMysql.storeResults()?.numRows() == 1
+}
+
 func convertRowToUserWith(row: [String?]) -> User? {
     let newUser = User()
     guard row.count == 8 else {

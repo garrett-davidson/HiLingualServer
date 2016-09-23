@@ -61,6 +61,13 @@ func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         print("invalid recipient ID")
         return
     }
+
+    guard isValid(userId: recipient) else {
+        invalidMessage(request: request, response)
+        print("Invalid recipient ID")
+        return
+    }
+
     addMessageToTable(auth: auth, recipient: recipient, message: message)
 }
 
@@ -114,6 +121,12 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     guard let recipient = Int(recipientString) else {
         invalidMessage(request: request, response)
         print("invalid recipient ID")
+        return
+    }
+
+    guard isValid(userId: recipient) else {
+        invalidMessage(request: request, response)
+        print("Invalid recipient ID")
         return
     }
 
@@ -178,6 +191,13 @@ func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         print("invalid recipient ID")
         return
     }
+
+    guard isValid(userId: recipient) else {
+        invalidMessage(request: request, response)
+        print("Invalid recipient ID")
+        return
+    }
+
     if let audio = storePicture(atPath: uploads[0].tmpFileName) {
         addAudioMessageToTable(auth: auth, recipient: recipient, audio: audio)
     } else {
