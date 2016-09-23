@@ -11,35 +11,39 @@ let facebookTable = "hl_facebook_data"
 let googleTable = "hl_google_data"
 
 let createMessagesTableQuery = "CREATE TABLE IF NOT EXISTS \(messagesTable)(" +
-    "message_id BIGINT UNIQUE PRIMARY KEY AUTO_INCREMENT, " +
-    "sent_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
-    "edit_timestamp DATETIME, " +
-    "sender_id BIGINT, " +
-    "receiver_id BIGINT, " +
-    "message VARCHAR(500), " +
-    "edited_message VARCHAR(500), " +
-    "picture VARCHAR(500), " +
-"audio VARCHAR(500));"
+  "message_id BIGINT UNIQUE PRIMARY KEY AUTO_INCREMENT, " +
+  "sent_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, " +
+  "edit_timestamp DATETIME, " +
+  "sender_id BIGINT, " +
+  "receiver_id BIGINT, " +
+  "message VARCHAR(500), " +
+  "edited_message VARCHAR(500), " +
+  "picture VARCHAR(500), " +
+  "audio VARCHAR(500));"
 let createUsersTableQuery = "CREATE TABLE IF NOT EXISTS \(usersTable)(" +
-    "user_id BIGINT UNIQUE PRIMARY KEY AUTO_INCREMENT, " +
-    "name TINYTEXT, " +
-    "displayName TINYTEXT, " +
-    "bio LONGTEXT, " +
-    "gender TINYTEXT, " +
-    "birthdate DATETIME, " +
-    "session_token LONGTEXT, " +
-"learning_languages LONGTEXT);"
+  "user_id BIGINT UNIQUE PRIMARY KEY AUTO_INCREMENT, " +
+  "name TINYTEXT, " +
+  "displayName TINYTEXT, " +
+  "bio LONGTEXT, " +
+  "gender TINYTEXT, " +
+  "birthdate DATETIME, " +
+  "session_token LONGTEXT, " +
+  "learning_languages LONGTEXT);"
 let createFacebookTableQuery = "CREATE TABLE IF NOT EXISTS \(facebookTable)(" +
-    "user_id BIGINT UNIQUE PRIMARY KEY, " +
-    "account_id VARCHAR(255), " +
-"token TEXT);"
+  "user_id BIGINT UNIQUE PRIMARY KEY, " +
+  "account_id VARCHAR(255), " +
+  "token TEXT);"
 
 let createGoogleTableQuery = "CREATE TABLE IF NOT EXISTS \(googleTable)a(" +
-    "user_id BIGINT UNIQUE PRIMARY KEY, " +
-    "account_id VARCHAR(255), " +
-"token TEXT);"
+  "user_id BIGINT UNIQUE PRIMARY KEY, " +
+  "account_id VARCHAR(255), " +
+  "token TEXT);"
 
 let dataMysql = MySQL()
+
+func closeDatabase() {
+    dataMysql.close()
+}
 
 func setupMysql() {
     print("Connecting to mysql database...")
@@ -47,7 +51,6 @@ func setupMysql() {
         print("Failure connecting to data server \(testHost)")
         return
     }
-
 
     if !dataMysql.selectDatabase(named: testSchema) {
         print("Creating database \(testSchema)")
@@ -90,7 +93,11 @@ func setupMysql() {
     }
 }
 func addMessageToTable(auth: String, recipient: Int, message: String) {
-    guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,1,\(recipient),\"\(message)\",NULL,NULL,NULL);") else {
+    guard let encodedMessage = message.toBase64() else {
+        print("Unable to encode message")
+        return
+    }
+    guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,1,\(recipient),\"\(encodedMessage)\",NULL,NULL,NULL);") else {
         print("Error inserting into hl_chat_messages")
         return
     }
@@ -114,7 +121,19 @@ func addPictureMessageToTable(auth: String, recipient: Int, picture: String) {
 }
 
 func overwriteUserData(user: User) {
-    guard dataMysql.query(statement: "UPDATE hl_users VALUE (\(user.getUserId()),\(user.getName()),\(user.getDisplayName()),\(user.getBio()),\(user.getGender()),\(user.getBirthdate()),NULL,NULL);") else {
+    guard let name = user.getName().toBase64() else {
+        return
+    }
+
+    guard let displayName = user.getDisplayName().toBase64() else {
+        return
+    }
+
+    guard let bio = user.getBio().toBase64() else {
+        return
+    }
+
+    guard dataMysql.query(statement: "UPDATE hl_users VALUE (\(user.getUserId()),\(name),\(displayName),\(bio),\(user.getGender()),\(user.getBirthdate()),NULL,NULL);") else {
         print("Error updating user")
         return
     }
@@ -171,15 +190,15 @@ func convertRowToUserWith(row: [String?]) -> User? {
         return nil
     }
     newUser.setUserId(newUserId: userId)
-    guard let name = row[1] else {
+    guard let name = row[1]?.fromBase64() else {
         return nil
     }
     newUser.setName(newName: name)
-    guard let displayName = row[2] else {
+    guard let displayName = row[2]?.fromBase64() else {
         return nil
     }
     newUser.setDisplayName(newDisplayName: displayName)
-    guard let bio = row[3] else {
+    guard let bio = row[3]?.fromBase64() else {
         return nil
     }
     newUser.setBio(newBio: bio)
@@ -195,7 +214,7 @@ func convertRowToUserWith(row: [String?]) -> User? {
         tempGender = Gender.NOTSET
     }
     newUser.setGender(newGender: tempGender)
-    guard  let b = row[5], let birthdate = Int(b) else {
+    guard let b = row[5], let birthdate = Int(b) else {
         return nil
     }
     newUser.setBirthdate(newBirthdate: birthdate)
@@ -203,13 +222,13 @@ func convertRowToUserWith(row: [String?]) -> User? {
         return nil
     }
     newUser.setAuthorityAccountId(newAuthorityAccountId: authAccountId)
-    guard  let sessionToken = row[7] else {
+    guard let sessionToken = row[7] else {
         return nil
     }
     newUser.setSessionToken(newSessionToken: sessionToken)
     return newUser
-
 }
+
 func isValidSession(userId: Int, sessionToken: String) -> User? {
     guard dataMysql.query(statement: "SELECT * from hl_users WHERE user_id = \(userId)") else {
         return nil
@@ -232,4 +251,17 @@ func isValidSession(userId: Int, sessionToken: String) -> User? {
         return nil
     }
 
+}
+
+extension String {
+    func toBase64() -> String? {
+        return data(using: String.Encoding.utf8)?.base64EncodedString()
+    }
+
+    func fromBase64() -> String? {
+        guard let data = Data(base64Encoded: self) else {
+            return nil
+        }
+        return String(data: data, encoding: String.Encoding.utf8)
+    }
 }
