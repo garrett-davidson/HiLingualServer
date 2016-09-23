@@ -30,6 +30,7 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 	    return
 	}
 
+        // swiftlint:disable opening_brace
 	var urlStringArray = urlString.characters.split{$0 == "/"}.map(String.init)
 	do {
 		guard let result = try jsonString.jsonDecode() as? Dictionary<String, AnyObject> else {
