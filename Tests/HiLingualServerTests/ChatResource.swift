@@ -5,19 +5,15 @@ class ChatResourceTests: XCTestCase {
     let invalidMessageBody = "<html><title>chat</title><body>Invalid message!</body></html>"
 
     func testSendMessageWithRequest() {
-        var request = ShimHTTPRequest()
-        var response = ShimHTTPResponse()
+        let request = ShimHTTPRequest()
+        let response = ShimHTTPResponse()
 
-        sendMessageWith(request: request, response)
-        guard let bodyDict = response.body else {
-            XCTFail()
+        handleChat(request: request, response)
+        guard let body = response.body else {
+            XCTFail("Response has no body")
             return
         }
 
-        guard let body = bodyDict["string"] as? String else {
-            XCTFail()
-            return
-        }
         XCTAssertEqual(body, invalidMessageBody)
     }
 }
