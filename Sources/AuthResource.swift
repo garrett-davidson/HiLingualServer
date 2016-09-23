@@ -2,6 +2,12 @@ import PerfectLib
 import Foundation
 import PerfectHTTP
 
+extension String {
+   var isAlphanumeric: Bool {
+       return range(of: "^[a-zA-Z0-9]+$", options: .regularExpression) != nil
+   }
+}
+
 func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
     //parse uri and call relevant funtion
     //response.setHeader(.contentType, value: "text/html")
@@ -11,7 +17,7 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
     }
 
     guard var urlString = request.urlVariables[routeTrailingWildcardKey] else {
-        print("bad request")
+        print("bad request, no urlstring")
         badRequestResponse(response: response)
     	return
     }
@@ -23,14 +29,15 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 
     guard let jsonString: String = request.postBodyString else {
         print("Empty body")
-        print("bad request")
+        print("bad request, nojson body")
         badRequestResponse(response: response)
         return
     }
 
     do {
 	guard let result = try jsonString.jsonDecode() as? [String: AnyObject] else {
-	    print("invalid json string")
+	    print("invalid json string, nil")
+        badRequestResponse(response: response)
 	    return
 	}
 
@@ -51,7 +58,7 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 	    }
 	    response.completed()
 	} catch {
-	    print("bad request")
+	    print("bad request, invalid json syntax")
 	    badRequestResponse(response: response)
 	    return
 	}
@@ -65,7 +72,7 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 	    logoutWith(request: request, response, result)
 	}
     } catch {
-	print("bad request")
+	print("bad request, invalid json body")
 	badRequestResponse(response: response)
 	return
     }
@@ -75,22 +82,34 @@ func verifyAuthToken(request: HTTPRequest, _ response: HTTPResponse, _ requestBo
     //https://graph.facebook.com/me?access_token=xxxxxxxxxxxxxxxxx     FACEBOOK URL
     //
     guard let token = requestBodyDic["authorityToken"] as? String else {
-   	print("no auth token sent")
-   	return false
+   	    print("no auth token sent")
+        badRequestResponse(response: response)
+   	    return false
     }
     guard let auth = requestBodyDic["authority"] as? String else {
    	print("no authority sent")
    	return false
     }
     if auth == "FACEBOOK" {
+        let result = checkFacebookAuthority(token)
+        if result {
+            return result
+        } else {
+            unauthorizedResponse(response: response)
+        }
     	return checkFacebookAuthority(token)
     } else if auth == "GOOGLE" {
-    	return checkGoogleAuthority(token)
+        let result = checkGoogleAuthority(token)
+        if result {
+            return result
+        } else {
+            unauthorizedResponse(response: response)
+        }
     } else {
 	    print("bad authority sent")
         unauthorizedResponse(response: response)
-    	return false
     }
+    return false
 }
 
 func checkGoogleAuthority(_ token: String) -> Bool {
@@ -136,6 +155,22 @@ func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic:
     print(requestBodyDic["authority"])
     print(requestBodyDic["authorityAccountId"])
     print(requestBodyDic["authorityToken"])
+    guard let authorityProvider = requestBodyDic["authority"] as? String else {
+        badRequestResponse(response: response)
+        return
+    }
+    guard let authorityAccountId = requestBodyDic["authorityAccountId"] as? String else {
+        badRequestResponse(response: response)
+        return
+    }
+    guard let authorityToken = requestBodyDic["authorityToken"] as? String else {
+        badRequestResponse(response: response)
+        return
+    }
+    if !authorityProvider.isAlphanumeric || !authorityAccountId.isAlphanumeric || !authorityToken.isAlphanumeric {
+        badRequestResponse(response: response)
+        return
+    }
     if verifyAuthToken(request: request, response, requestBodyDic) {
 	guard let token = requestBodyDic["authorityToken"] as? String else {
 	    print("no auth token sent")
@@ -149,7 +184,7 @@ func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic:
     	}
     	loginUserWith(authAccountId: authID, sessionId: token)
     } else {
-	   errorResponse(response: response)
+        return
     }
 }
 
@@ -173,7 +208,7 @@ func logoutWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic
     	}
     	logoutUserWith(sessionId: token)
     } else {
-	errorResponse(response: response)
+	       return
     }
 }
 
@@ -182,6 +217,22 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
     print(requestBodyDic["authority"])
     print(requestBodyDic["authorityAccountId"])
     print(requestBodyDic["authorityToken"])
+    guard let authorityProvider = requestBodyDic["authority"] as? String else {
+        badRequestResponse(response: response)
+        return
+    }
+    guard let authorityAccountId = requestBodyDic["authorityAccountId"] as? String else {
+        badRequestResponse(response: response)
+        return
+    }
+    guard let authorityToken = requestBodyDic["authorityToken"] as? String else {
+        badRequestResponse(response: response)
+        return
+    }
+    if !authorityProvider.isAlphanumeric || !authorityAccountId.isAlphanumeric || !authorityToken.isAlphanumeric {
+        badRequestResponse(response: response)
+        return
+    }
     if verifyAuthToken(request: request, response, requestBodyDic) {
 	guard let token = requestBodyDic["authorityToken"] as? String else {
 	    print("no auth token sent")
@@ -200,7 +251,7 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
 	    print(error)
 	}
     } else {
-	   unauthorizedResponse(response: response)
+	   return
     }
 
     //create new user in database
