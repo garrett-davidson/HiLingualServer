@@ -33,28 +33,28 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
         // swiftlint:disable opening_brace
 	var urlStringArray = urlString.characters.split{$0 == "/"}.map(String.init)
 	do {
-		guard let result = try jsonString.jsonDecode() as? Dictionary<String, AnyObject> else {
-			print("invalid json string")
-			return
-		}
-		//validate request
-		guard let _ = request.header(HTTPRequestHeader.Name.authorization) else {
-			print("no auth parameter")
-			unauthorizedResponse(response: response)
+	    guard let result = try jsonString.jsonDecode() as? Dictionary<String, AnyObject> else {
+		print("invalid json string")
+		return
+	    }
+	    //validate request
+	    guard let _ = request.header(HTTPRequestHeader.Name.authorization) else {
+		print("no auth parameter")
+		unauthorizedResponse(response: response)
 	        return
 	    }
-		if urlStringArray[0] == "login" {
-			loginWith(request: request, response, result)
-		} else if urlStringArray[0] == "register" {
-			registerWith(request: request, response, result)
-		} else if urlStringArray[0] == "logout" {
-			logoutWith(request: request, response, result)
-		}
-		response.completed()
+	    if urlStringArray[0] == "login" {
+		loginWith(request: request, response, result)
+	    } else if urlStringArray[0] == "register" {
+		registerWith(request: request, response, result)
+	    } else if urlStringArray[0] == "logout" {
+		logoutWith(request: request, response, result)
+	    }
+	    response.completed()
 	} catch {
-		print("bad request")
-		badRequestResponse(response: response)
-		return
+	    print("bad request")
+	    badRequestResponse(response: response)
+	    return
 	}
 
 	print(urlString)
@@ -130,6 +130,7 @@ func checkFacebookAuthority(_ token: String) -> Bool {
     }
     return false
 }
+
 func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: [String: AnyObject]) {
     print("Logging in user")
     print(requestBodyDic["authority"])
@@ -180,22 +181,22 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
     print(requestBodyDic["authorityAccountId"])
     print(requestBodyDic["authorityToken"])
     if verifyAuthToken(request: request, response, requestBodyDic) {
-		guard let token = requestBodyDic["authorityToken"] as? String else {
-		    print("no auth token sent")
-		    return
-	    	}
+	guard let token = requestBodyDic["authorityToken"] as? String else {
+	    print("no auth token sent")
+	    return
+	}
 
-		guard let user = createUserWith(token: token) else {
-		    print("database error")
-		    return
-		}
+	guard let user = createUserWith(token: token) else {
+	    print("database error")
+	    return
+	}
 
-		let dict: [String: Any] = ["userId": user.getUserId(), "sessionId": user.getSessionToken()]
-		do {
-		    try response.setBody(json: dict)
-		} catch {
-		    print(error)
-		}
+	let dict: [String: Any] = ["userId": user.getUserId(), "sessionId": user.getSessionToken()]
+	do {
+	    try response.setBody(json: dict)
+	} catch {
+	    print(error)
+	}
     } else {
 	unauthorizedResponse(response: response)
     }

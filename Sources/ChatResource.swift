@@ -106,7 +106,7 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     print("recipient=\(recipientString)")
 
     if uploads[0].fileSize > 10000000 {
-        print("picture is to big")
+        print("picture is too big")
         invalidMessage(request: request, response)
         return
     }
@@ -116,10 +116,13 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         print("invalid recipient ID")
         return
     }
+
     if let picture = storePicture(atPath: uploads[0].tmpFileName) {
         addPictureMessageToTable(auth: auth, recipient: recipient, picture: picture)
+    } else {
+        response.setHeader(.contentType, value: "text/html")
+        response.setBody(string: "<html><title>chat</title><body>Unable to save picture</body></html>")
     }
-
 }
 
 func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
@@ -165,7 +168,7 @@ func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     print("recipient=\(recipientString)")
 
     if uploads[0].fileSize > 10000000 {
-        print("Audio is to big")
+        print("Audio is too big")
         invalidMessage(request: request, response)
         return
     }
@@ -177,8 +180,10 @@ func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     }
     if let audio = storePicture(atPath: uploads[0].tmpFileName) {
         addAudioMessageToTable(auth: auth, recipient: recipient, audio: audio)
+    } else {
+        response.setHeader(.contentType, value: "text/html")
+        response.setBody(string: "<html><title>chat</title><body>Unable to save audio</body></html>")
     }
-
 }
 
 func storePicture(atPath srcPath: String) -> String? {
