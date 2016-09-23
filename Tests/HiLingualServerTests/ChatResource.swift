@@ -1,10 +1,12 @@
 import XCTest
 import PerfectHTTP
 @testable import HiLingualServer
+typealias ShimBodySpec = MimeReader.BodySpec
 
 class ChatResourceTests: XCTestCase {
     let invalidMessageBody = "<html><title>chat</title><body>Invalid message!</body></html>"
     let validMessageBody = "<html><title>chat</title><body>Chat resource Message</body></html>"
+    let validPictureBody = "<html><title>picture</title><body>Chat resource Picture</body></html>"
     let validAuthToken = "1234567890"
     let validUserId = "1"
 
@@ -26,6 +28,12 @@ class ChatResourceTests: XCTestCase {
             return
         }
 
+    }
+    
+    override func tearDown() {
+        super.tearDown()
+        
+        dataMysql.close()
     }
 
     func testSendMessageWithRequest() {
@@ -71,14 +79,26 @@ class ChatResourceTests: XCTestCase {
         request.postParams = [("auth", validAuthToken),
                               ("recipient", "3")]
         sendTestChatWith(request: request, response: response, expectedResponseString: invalidMessageBody, failureString: "Allowed sening chat with no message")
-
-        //PICTURE MESSAGE
-
+    }
+    
+    func testSendPictureMessageWithRequest() {
+        
+        let request = ShimHTTPRequest()
+        let response = ShimHTTPResponse()
+        request.method = HTTPMethod.post
         // Empty request
 
         // Successful request
 
+        request.postParams = [("auth", validAuthToken),
+                              ("recipient", validUserId)]
+        sendTestPictureWith(request: request, response: response, fileName: "cantaloupe-melon", size: 731245, expectedResponseString: validPictureBody, failureString: "Could not send Picture")
+
         // Too large of picture
+
+        request.postParams = [("auth", validAuthToken),
+                              ("recipient", validUserId)]
+        sendTestPictureWith(request: request, response: response, fileName: "11mb", size: 11534222, expectedResponseString: invalidMessageBody, failureString: "Picture is over 10MB")
 
         // More than 1 picture
 
@@ -97,8 +117,9 @@ class ChatResourceTests: XCTestCase {
         // Invalid picture
 
         // No picture
-
-
+    }
+    func testSendAudioMessageWithRequest() {
+        
         //AUDIO MESSAGE
 
         // Empty request
@@ -128,6 +149,57 @@ class ChatResourceTests: XCTestCase {
 
     func sendTestChatWith(request: ShimHTTPRequest, response: ShimHTTPResponse, expectedResponseString: String, failureString: String) {
         handleChat(request: request, response)
+        guard let body = response.body else {
+            XCTFail("Test failure: Response has no body")
+            return
+        }
+        XCTAssertEqual(body, expectedResponseString, "Test failure: " + failureString)
+    }
+    
+    func sendTestPictureWith(request: ShimHTTPRequest, response: ShimHTTPResponse, fileName: String, size: Int, expectedResponseString: String, failureString: String) {
+        let fileManager = FileManager.default
+        let boundaryString = "gfdshtershagarseaha"
+        let mimeReader = MimeReader("multipart/form-data; boundary=" + boundaryString,tempDir: fileManager.currentDirectoryPath)
+        do {
+            try fileManager.copyItem(atPath: fileManager.currentDirectoryPath + "/Tests/HiLingualServerTests/\(fileName).jpg", toPath: fileManager.currentDirectoryPath + "/Tests/HiLingualServerTests/\(fileName)Duplicate.jpg")
+        }
+        catch let error as NSError {
+            print("Ooops! Something went wrong: \(error)")
+            if error.code != 516 {
+                XCTFail("No picture \(fileName).jpg found")
+            }
+        }
+        let filePath = fileManager.currentDirectoryPath + "/Tests/HiLingualServerTests/\(fileName)Duplicate.jpg"
+        
+        var bytes = [UInt8]()
+        
+        do {
+            let imageData = try Data(contentsOf: URL(fileURLWithPath: filePath))
+            var data = Data()
+            data.append("--\(boundaryString)\r\n".data(using: .utf8)!)
+            data.append("Content-Disposition: form-data; name=body\r\n".data(using: .utf8)!)
+            data.append("Content-Type: image/jpg\r\n\r\n".data(using: .utf8)!)
+            data.append(imageData)
+            data.append("\r\n".data(using: .utf8)!)
+            
+            var buffer = [UInt8](repeating: 0, count: data.count)
+            data.copyBytes(to: &buffer, count: data.count)
+            bytes = buffer
+            
+            mimeReader.addToBuffer(bytes: bytes)
+            
+            let picture = mimeReader.bodySpecs.last!
+            picture.fieldName = "body"
+            picture.contentType = "image/jpg"
+            picture.fileName = fileName + ".jpg"
+            picture.fileSize = size
+            picture.tmpFileName = fileManager.currentDirectoryPath + "/Tests/HiLingualServerTests/\(fileName)Duplicate.jpg"
+            request.postFileUploads = [picture]
+        } catch {
+            XCTFail("Could not read image")
+        }
+        
+        handlePicture(request: request, response)
         guard let body = response.body else {
             XCTFail("Test failure: Response has no body")
             return
