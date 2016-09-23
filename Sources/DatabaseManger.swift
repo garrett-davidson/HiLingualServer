@@ -243,8 +243,8 @@ func convertRowToUserWith(row: [String?]) -> User? {
     return newUser
 }
 
-func isValidSession(userId: Int, sessionToken: String) -> User? {
-    guard dataMysql.query(statement: "SELECT * from hl_users WHERE user_id = \(userId)") else {
+func isValidSession(sessionToken: String) -> User? {
+    guard dataMysql.query(statement: "SELECT * from hl_users WHERE sessionToken = \(sessionToken)") else {
         return nil
     }
     guard let results = dataMysql.storeResults() else {
