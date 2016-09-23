@@ -5,13 +5,15 @@ import PerfectHTTP
 func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
     //parse uri and call relevant funtion
     //response.setHeader(.contentType, value: "text/html")
-    print("start")
+    print("starter")
     defer {
 	response.completed()
     }
 
     guard var urlString = request.urlVariables[routeTrailingWildcardKey] else {
-	return
+        print("bad request")
+        badRequestResponse(response: response)
+    	return
     }
 
     //deserialize request JSON body to Dictionary
@@ -21,6 +23,8 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 
     guard let jsonString: String = request.postBodyString else {
         print("Empty body")
+        print("bad request")
+        badRequestResponse(response: response)
         return
     }
 
@@ -38,11 +42,6 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
 		return
 	    }
 	    //validate request
-	    guard let _ = request.header(HTTPRequestHeader.Name.authorization) else {
-		print("no auth parameter")
-		unauthorizedResponse(response: response)
-	        return
-	    }
 	    if urlStringArray[0] == "login" {
 		loginWith(request: request, response, result)
 	    } else if urlStringArray[0] == "register" {
@@ -88,8 +87,9 @@ func verifyAuthToken(request: HTTPRequest, _ response: HTTPResponse, _ requestBo
     } else if auth == "GOOGLE" {
     	return checkGoogleAuthority(token)
     } else {
-	print("bad authority sent")
-   	return false
+	    print("bad authority sent")
+        unauthorizedResponse(response: response)
+    	return false
     }
 }
 
@@ -149,17 +149,19 @@ func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic:
     	}
     	loginUserWith(authAccountId: authID, sessionId: token)
     } else {
-	errorResponse(response: response)
+	   errorResponse(response: response)
     }
 }
 
 func logoutWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: [String: AnyObject]) {
     print("Logging out user")
-    print(requestBodyDic["authority"])
-    print(requestBodyDic["authorityAccountId"])
-    print(requestBodyDic["authorityToken"])
+    guard let auth = request.header(HTTPRequestHeader.Name.authorization) else {
+        print("no auth parameter")
+        badRequestResponse(response: response)
+        return
+    }
     if verifyAuthToken(request: request, response, requestBodyDic) {
-	guard let token = requestBodyDic["authorityToken"] as? String else {
+	guard let token = auth as? String else {
 	    print("no auth token sent")
 	    badRequestResponse(response: response)
 	    return
@@ -169,7 +171,7 @@ func logoutWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic
 	    badRequestResponse(response: response)
 	    return
     	}
-    	logoutUserWith(authAccountId: authID, sessionId: token)
+    	logoutUserWith(sessionId: token)
     } else {
 	errorResponse(response: response)
     }
@@ -198,7 +200,7 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
 	    print(error)
 	}
     } else {
-	unauthorizedResponse(response: response)
+	   unauthorizedResponse(response: response)
     }
 
     //create new user in database
