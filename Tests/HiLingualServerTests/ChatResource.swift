@@ -103,19 +103,42 @@ class ChatResourceTests: XCTestCase {
 
         // Extra fields
 
-        // Invalid session token
+        request.postParams = [("auth", validAuthToken),
+                              ("recipient", validUserId),
+                               ("extraField", "asdf") ]
+        sendTestPictureWith(request: request, response: response, fileName: "cantaloupe-melon", size: 731245, expectedResponseString: validPictureBody, failureString: "Didn't handle extra fields")
 
+        // Invalid session token
+        /*
+        request.postParams = [("auth", "adsf"),
+                              ("recipient", validUserId)]
+        sendTestPictureWith(request: request, response: response, fileName: "cantaloupe-melon", size: 731245, expectedResponseString: invalidMessageBody, failureString: "Allowed an invalid session token")
+        */
         // Invalid recipient
+        request.postParams = [("auth", validAuthToken),
+                              ("recipient", "sure")]
+        sendTestPictureWith(request: request, response: response, fileName: "cantaloupe-melon", size: 731245, expectedResponseString: invalidMessageBody, failureString: "Allowed an invalid invalid recipient")
 
         // Message to self
 
         // Nonexistent recipient
 
-        // Empty picture
+        request.postParams = [("auth", "adsf")]
+        sendTestPictureWith(request: request, response: response, fileName: "cantaloupe-melon", size: 731245, expectedResponseString: invalidMessageBody, failureString: "Allowed a Nonexistent recipient")
 
+        // Empty picture
+        request.postFileUploads = nil
+        request.postParams = [("auth", validAuthToken),
+                              ("recipient", validUserId)]
+        sendTestPictureWithNoPicture(request: request, response: response, expectedResponseString: invalidMessageBody, failureString: "Allowed no picture")
+        /*
         // Invalid picture
 
-        // No picture
+        request.postParams = [("auth", "adsf"),
+                              ("recipient", "sure")]
+        sendTestPictureWith(request: request, response: response, fileName: "under10", size: 731245, expectedResponseString: validPictureBody, failureString: "Allowed a Nonexistent recipient")
+         */
+
     }
     func testSendAudioMessageWithRequest() {
 
@@ -162,7 +185,6 @@ class ChatResourceTests: XCTestCase {
         do {
             try fileManager.copyItem(atPath: fileManager.currentDirectoryPath + "/Tests/HiLingualServerTests/\(fileName).jpg", toPath: fileManager.currentDirectoryPath + "/Tests/HiLingualServerTests/\(fileName)Duplicate.jpg")
         } catch let error as NSError {
-            print("Ooops! Something went wrong: \(error)")
             if error.code != 516 {
                 XCTFail("No picture \(fileName).jpg found")
             }
@@ -203,5 +225,15 @@ class ChatResourceTests: XCTestCase {
             return
         }
         XCTAssertEqual(body, expectedResponseString, "Test failure: " + failureString)
+    }
+
+    func sendTestPictureWithNoPicture(request: ShimHTTPRequest, response: ShimHTTPResponse, expectedResponseString: String, failureString: String) {
+        handlePicture(request: request, response)
+        guard let body = response.body else {
+            XCTFail("Test failure: Response has no body")
+            return
+        }
+        XCTAssertEqual(body, expectedResponseString, "Test failure: " + failureString)
+
     }
 }

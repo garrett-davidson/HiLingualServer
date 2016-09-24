@@ -16,7 +16,7 @@ func handleChat(request: HTTPRequest, _ response: HTTPResponse) {
 func handlePicture(request: HTTPRequest, _ response: HTTPResponse) {
     //parse uri and call relevant funtion
     response.setHeader(.contentType, value: "text/html")
-    response.appendBody(string: "<html><title>picture</title><body>Chat resource Picture</body></html>")
+    response.setBody(string: "<html><title>picture</title><body>Chat resource Picture</body></html>")
     sendPictureMessageWith(request: request, response)
     response.completed()
 }
@@ -24,7 +24,7 @@ func handlePicture(request: HTTPRequest, _ response: HTTPResponse) {
 func handleAudio(request: HTTPRequest, _ response: HTTPResponse) {
     //parse uri and call relevant funtion
     response.setHeader(.contentType, value: "text/html")
-    response.appendBody(string: "<html><title>Audio</title><body>Chat resource Audio</body></html>")
+    response.setBody(string: "<html><title>Audio</title><body>Chat resource Audio</body></html>")
     sendAudioMessageWith(request: request, response)
     response.completed()
 }
@@ -87,6 +87,7 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
 
     guard let uploads = request.postFileUploads, uploads.count > 0  else {
         print("no uploads")
+        invalidMessage(request: request, response)
         return
     }
 
@@ -154,6 +155,7 @@ func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
 
     guard let uploads = request.postFileUploads, uploads.count > 0  else {
         print("no uploads")
+        invalidMessage(request: request, response)
         return
     }
 
