@@ -159,7 +159,7 @@ class AuthResourceTests: XCTestCase {
 
 
         // Too long message
-   
+
     }
 
 
@@ -170,20 +170,3 @@ class AuthResourceTests: XCTestCase {
         XCTAssert(code == expectedResponseCode, failureString)
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
