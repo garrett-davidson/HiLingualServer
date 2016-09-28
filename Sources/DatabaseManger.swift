@@ -295,6 +295,29 @@ func isValidSession(sessionToken: String) -> User? {
 
 }
 
+func getUser(userId: Int) -> User? {
+    guard dataMysql.query(statement: "SELECT * from hl_users WHERE user_id = \(userId)") else {
+        return nil
+    }
+    guard let results = dataMysql.storeResults() else {
+        return nil
+    }
+    guard results.numRows() == 1 else {
+        return nil
+    }
+    guard let row = results.next() else {
+        return nil
+    }
+    guard let tempUser = convertRowToUserWith(row: row) else {
+        return nil
+    }
+    if tempUser.getSessionToken() == sessionToken {
+        return tempUser
+    } else {
+        return nil
+    }
+}
+
 extension String {
     func toBase64() -> String? {
         return data(using: String.Encoding.utf8)?.base64EncodedString()
