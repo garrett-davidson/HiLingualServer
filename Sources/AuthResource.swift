@@ -182,7 +182,7 @@ func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic:
 	    badRequestResponse(response: response)
 	    return
     	}
-    	loginUserWith(authAccountId: authID, sessionId: token)
+    	let _ = loginUserWith(authAccountId: authID, sessionId: token)
     } else {
         return
     }
@@ -195,20 +195,15 @@ func logoutWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic
         badRequestResponse(response: response)
         return
     }
-    if verifyAuthToken(request: request, response, requestBodyDic) {
-	guard let token = auth as? String else {
-	    print("no auth token sent")
-	    badRequestResponse(response: response)
-	    return
-    	}
-    	guard let authID = requestBodyDic["authorityAccountId"] as? String else {
+	guard let userId = requestBodyDic["user_id"] as? String, let userIdInt = Int(userId) else {
 	    print("no authID sent")
 	    badRequestResponse(response: response)
 	    return
-    	}
-    	logoutUserWith(sessionId: token)
+	}
+    if verifyAuthToken(request: request, response, requestBodyDic) {
+		let _ = logoutUserWith(userId: userIdInt, sessionId: auth)
     } else {
-	       return
+    	return
     }
 }
 
