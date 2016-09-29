@@ -9,7 +9,6 @@ class AuthResourceTests: XCTestCase {
     let validAuthToken = "EAAOcGlfuCWEBAAAFBYCPHj25mTYVxCAaiT0ClFAXyqnOWjyIOXvkKjkhEHPHNGTGfDYnFV3Gj3eNaLC6ZBydLwO1FtTrGgHfqWloIsfEnZCLya2yMWKAovZBQ61YCorwEshnDqnidYGF1Qzuhn9qGpkZA0Q9F26h3yPozO3oTVNB8eGYdqkI"
     let validUserId = "148313008891070"
 
-
     override func setUp() {
         super.setUp()
         // Create user with valid id, auth token
@@ -27,17 +26,16 @@ class AuthResourceTests: XCTestCase {
             XCTFail()
             return
         }
-
     }
 
     func testHandleAuth() {
         let request = ShimHTTPRequest()
         let response = ShimHTTPResponse()
 
-       //Login Request
+        //Login Request
         sendTestAuthWith(request: request, response: response, expectedResponseCode: invalidRequestCode, failureString: "1")
 
-         var   postBodyString = "{ \"authority\": \"FACEBOOK\",\"authorityAccountId\": \"1\"}"
+        var postBodyString = "{ \"authority\": \"FACEBOOK\",\"authorityAccountId\": \"1\"}"
         request.postBodyString = postBodyString
         request.urlVariables[routeTrailingWildcardKey] = "/login"
         sendTestAuthWith(request: request, response: response, expectedResponseCode: invalidRequestCode, failureString: "2")
@@ -47,8 +45,7 @@ class AuthResourceTests: XCTestCase {
         request.urlVariables[routeTrailingWildcardKey] = "/login"
         sendTestAuthWith(request: request, response: response, expectedResponseCode: invalidRequestCode, failureString: "3")
 
-
-          postBodyString = "{ \"authority\": \"BAD\",\"authorityAccountId\": \"1\",\"authorityToken\": \"1234567890\"}"
+        postBodyString = "{ \"authority\": \"BAD\",\"authorityAccountId\": \"1\",\"authorityToken\": \"1234567890\"}"
         request.postBodyString = postBodyString
         request.urlVariables[routeTrailingWildcardKey] = "/login"
         sendTestAuthWith(request: request, response: response, expectedResponseCode: invalidAuthCode, failureString: "4")
@@ -58,24 +55,20 @@ class AuthResourceTests: XCTestCase {
         request.urlVariables[routeTrailingWildcardKey] = "/login"
         sendTestAuthWith(request: request, response: response, expectedResponseCode: invalidRequestCode, failureString: "5")
 
-
-            postBodyString = "{ \"authority\": \"FACEBOOK\",\"authorityAccountId\": \"1123123\",\"authorityToken\": \"1234567890\"}"
+        postBodyString = "{ \"authority\": \"FACEBOOK\",\"authorityAccountId\": \"1123123\",\"authorityToken\": \"1234567890\"}"
         request.postBodyString = postBodyString
         request.urlVariables[routeTrailingWildcardKey] = "/login"
         sendTestAuthWith(request: request, response: response, expectedResponseCode: invalidAuthCode, failureString: "6")
-
 
         postBodyString = "{ \"authority\": \"FACEBOOK\",\"authorityAccountId\": \"\(validUserId)\",\"authorityToken\": \"\(validAuthToken)\"}"
         request.postBodyString = postBodyString
         request.urlVariables[routeTrailingWildcardKey] = "/login"
         sendTestAuthWith(request: request, response: response, expectedResponseCode: validErrorCode, failureString: "7")
 
-
-            postBodyString = "{ \"authority\": \"😗\",\"authorityAccountId\": \"😗\",\"authorityToken\": \"😗\"}"
+        postBodyString = "{ \"authority\": \"😗\",\"authorityAccountId\": \"😗\",\"authorityToken\": \"😗\"}"
         request.postBodyString = postBodyString
         request.urlVariables[routeTrailingWildcardKey] = "/login"
         sendTestAuthWith(request: request, response: response, expectedResponseCode: invalidRequestCode, failureString: "8")
-
 
         postBodyString = "{ \"authority\": \"\",\"authorityAccountId\": \"\",\"authorityToken\": \"\"}"
         request.postBodyString = postBodyString
@@ -83,26 +76,18 @@ class AuthResourceTests: XCTestCase {
         sendTestAuthWith(request: request, response: response, expectedResponseCode: invalidRequestCode, failureString: "9")
 
 
-
-
-
-
-
-
-//Register user
+        //Register user
         postBodyString = "{ \"authority\": \"FACEBOOK\",\"authorityAccountId\": \"1\"}"
         request.postBodyString = postBodyString
         request.urlVariables[routeTrailingWildcardKey] = "/register"
         sendTestAuthWith(request: request, response: response, expectedResponseCode: invalidRequestCode, failureString: "10")
-
 
         postBodyString = "{ \"authorityAccountId\": \"1\",\"authorityToken\": \"1234567890\"}"
         request.postBodyString = postBodyString
         request.urlVariables[routeTrailingWildcardKey] = "/register"
         sendTestAuthWith(request: request, response: response, expectedResponseCode: invalidRequestCode, failureString: "11")
 
-
-            postBodyString = "{ \"authority\": \"BAD\",\"authorityAccountId\": \"1\",\"authorityToken\": \"1234567890\"}"
+        postBodyString = "{ \"authority\": \"BAD\",\"authorityAccountId\": \"1\",\"authorityToken\": \"1234567890\"}"
         request.postBodyString = postBodyString
         request.urlVariables[routeTrailingWildcardKey] = "/register"
         sendTestAuthWith(request: request, response: response, expectedResponseCode: invalidAuthCode, failureString: "12")
@@ -112,30 +97,25 @@ class AuthResourceTests: XCTestCase {
         request.urlVariables[routeTrailingWildcardKey] = "/register"
         sendTestAuthWith(request: request, response: response, expectedResponseCode: invalidRequestCode, failureString: "13")
 
-
-            postBodyString = "{ \"authority\": \"FACEBOOK\",\"authorityAccountId\": \"1123123\",\"authorityToken\": \"1234567890\"}"
+        postBodyString = "{ \"authority\": \"FACEBOOK\",\"authorityAccountId\": \"1123123\",\"authorityToken\": \"1234567890\"}"
         request.postBodyString = postBodyString
         request.urlVariables[routeTrailingWildcardKey] = "/register"
         sendTestAuthWith(request: request, response: response, expectedResponseCode: invalidAuthCode, failureString: "14")
-
 
         postBodyString = "{ \"authority\": \"FACEBOOK\",\"authorityAccountId\": \"\(validUserId)\",\"authorityToken\": \(validAuthToken)\"}"
         request.postBodyString = postBodyString
         request.urlVariables[routeTrailingWildcardKey] = "/register"
         sendTestAuthWith(request: request, response: response, expectedResponseCode: validErrorCode, failureString: "15")
 
-
-            postBodyString = "{ \"authority\": \"😗\",\"authorityAccountId\": \"😗\",\"authorityToken\": \"😗\"}"
+        postBodyString = "{ \"authority\": \"😗\",\"authorityAccountId\": \"😗\",\"authorityToken\": \"😗\"}"
         request.postBodyString = postBodyString
         request.urlVariables[routeTrailingWildcardKey] = "/register"
         sendTestAuthWith(request: request, response: response, expectedResponseCode: invalidRequestCode, failureString: "16")
-
 
         postBodyString = "{ \"authority\": \"\",\"authorityAccountId\": \"\",\"authorityToken\": \"\"}"
         request.postBodyString = postBodyString
         request.urlVariables[routeTrailingWildcardKey] = "/register"
         sendTestAuthWith(request: request, response: response, expectedResponseCode: invalidRequestCode, failureString: "17")
-
 
         request.postParams = [("auth", "123123123")]
         request.urlVariables[routeTrailingWildcardKey] = "/logout"
@@ -157,11 +137,8 @@ class AuthResourceTests: XCTestCase {
         request.urlVariables[routeTrailingWildcardKey] = "/logout"
         sendTestAuthWith(request: request, response: response, expectedResponseCode: validErrorCode, failureString: "23")
 
-
         // Too long message
-
     }
-
 
     func sendTestAuthWith(request: ShimHTTPRequest, response: ShimHTTPResponse, expectedResponseCode: Int, failureString: String) {
         handleAuth(request: request, response)
