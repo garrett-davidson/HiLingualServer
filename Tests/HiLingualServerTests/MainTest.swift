@@ -24,6 +24,10 @@ class MainTests: XCTestCase {
     }
 
     func sendTest(request: URLRequest, withExpectedResponse expectedResponse: NSDictionary) {
+        sebdTestResponsewithExpectedResponse(request: request, withExpectedResponse: expectedResponse, expectedResponseCode: nil)
+    }
+
+    func sendTestResponse(request: URLRequest, withExpectedResponse expectedResponse: NSDictionary, expectedResponseCode: Int) {
         var resp: URLResponse?
 
         guard let returnedData = try? NSURLConnection.sendSynchronousRequest(request, returning: &resp) else {
@@ -35,12 +39,17 @@ class MainTests: XCTestCase {
             XCTFail("Request did not return a string: \(request)")
             return
         }
-
-        guard let returnedDictionary = (try? JSONSerialization.jsonObject(with: returnedData, options: JSONSerialization.ReadingOptions(rawValue: 0))) as? NSDictionary else {
-            XCTFail("Response was not a dictionary: \(returnString)\nFor request: \(request)")
-            return
+        
+        if expectedResponseCode != nil {
+            guard let returnedDictionary = (try? JSONSerialization.jsonObject(with: returnedData, options: JSONSerialization.ReadingOptions(rawValue: 0))) as? NSDictionary else {
+                XCTFail("Response was not a dictionary: \(returnString)\nFor request: \(request)")
+                return
+            }
+            XCTAssertEqual(returnedDictionary, expectedResponse)
+        } else {
+            let code = response.status.code
+            print("Recieved code: \(code) expecting \(expectedResponseCode)")
+            XCTAssert(code == expectedResponseCode, failureString)
         }
-
-        XCTAssertEqual(returnedDictionary, expectedResponse)
     }
 }
