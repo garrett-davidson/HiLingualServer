@@ -15,7 +15,7 @@ class MainTests: XCTestCase {
 
         request.httpMethod = "POST"
 
-        request.httpBody = try! JSONSerialization.data(withJSONObject: requestParameters, options: .init(rawValue: 0))
+        request.httpBody = try? JSONSerialization.data(withJSONObject: requestParameters, options: .init(rawValue: 0))
         request.allHTTPHeaderFields = ["Authorization": validToken]
 
         var expectedResponse: NSDictionary = ["":""]
