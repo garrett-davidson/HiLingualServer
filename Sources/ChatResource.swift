@@ -107,10 +107,10 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         ])
     guard let _ = NSImage(contentsOfFile: uploads[0].tmpFileName) else {
         print("Invalid Picture")
+        invalidMessage(request: request, response)
         return
     }
-    print(ary)
-    print("upload")
+    print("upload picture")
     print("auth=\(auth)")
     print("recipient=\(recipientString)")
 
@@ -122,7 +122,7 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
 
     guard let recipient = Int(recipientString) else {
         invalidMessage(request: request, response)
-        print("invalid recipient ID")
+        print("Invalid recipient ID")
         return
     }
 
@@ -176,10 +176,12 @@ func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     let fileUrl = URL(fileURLWithPath: uploads[0].tmpFileName)
     do {
         let _ = try AVAudioPlayer(contentsOf: fileUrl)
-    } catch let error as NSError {
-        print(error)
+    } catch {
+        invalidMessage(request: request, response)
+        print("Invalid Audio")
+        return
     }
-    print("upload")
+    print("upload audio")
     print("auth=\(auth)")
     print("recipient=\(recipientString)")
 
@@ -201,7 +203,7 @@ func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         return
     }
 
-    if let audio = storePicture(atPath: uploads[0].tmpFileName) {
+    if let audio = storeAudio(atPath: uploads[0].tmpFileName) {
         addAudioMessageToTable(auth: auth, recipient: recipient, audio: audio)
     } else {
         response.setHeader(.contentType, value: "text/html")
@@ -225,33 +227,41 @@ func storePicture(atPath srcPath: String) -> String? {
             try fileManager.moveItem(atPath: srcPath, toPath: path + fileName + "\(count)")
             return path + fileName + "\(count)"
         } catch let error as NSError {
-            print("could not store picture")
             if error.code == 516 {
                 count += 1
-                continue
+            } else {
+                print("could not store picture")
+                print(error)
+                return nil
             }
-            print(error)
-            return nil
         }
     }
 }
 
 func storeAudio(atPath srcPath: String) -> String? {
-    do {
-        let fileManager = FileManager.default
-        guard let fileName = srcPath.components(separatedBy: "/").last else {
-            print("no path")
-            return nil
-        }
-        let path = fileManager.currentDirectoryPath + "/Resources/Audio/"
+    var count = 0
 
-        try fileManager.createDirectory(atPath: path, withIntermediateDirectories: true)
-        try fileManager.moveItem(atPath: srcPath, toPath: path + fileName)
-        return path + fileName
-    } catch let error as NSError {
-        print("could not store Audio")
-        print(error)
-        return nil
+    while true {
+        do {
+            let fileManager = FileManager.default
+            guard let fileName = srcPath.components(separatedBy: "/").last else {
+                print("no path")
+                return nil
+            }
+            let path = fileManager.currentDirectoryPath + "/Resources/Audio/"
+            try fileManager.createDirectory(atPath: path, withIntermediateDirectories: true)
+
+            try fileManager.moveItem(atPath: srcPath, toPath: path + fileName + "\(count)")
+            return path + fileName + "\(count)"
+        } catch let error as NSError {
+            if error.code == 516 {
+                count += 1
+            } else {
+                print("could not store audio")
+                print(error)
+                return nil
+            }
+        }
     }
 }
 
