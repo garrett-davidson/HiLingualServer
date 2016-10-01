@@ -34,7 +34,7 @@ class MainTests: XCTestCase {
         let validAuthToken = "EAAOcGlfuCWEBAAAFBYCPHj25mTYVxCAaiT0ClFAXyqnOWjyIOXvkKjkhEHPHNGTGfDYnFV3Gj3eNaLC6ZBydLwO1FtTrGgHfqWloIsfEnZCLya2yMWKAovZBQ61YCorwEshnDqnidYGF1Qzuhn9qGpkZA0Q9F26h3yPozO3oTVNB8eGYdqkI"
         let validUserId = "148313008891070"
 
-        var postBodyString: [String: Any] = [ "authority": "FACEBOOK","authorityAccountId": 1]
+        var postBodyString: [String: Any] = [ "authority": "FACEBOOK", "authorityAccountId": 1]
         request.httpBody  = try? JSONSerialization.data(withJSONObject: postBodyString, options: .init(rawValue: 0))
         sendTestResponse(request: request, withExpectedResponse: nil, expectedResponseCode: invalidRequestCode)
 
@@ -44,31 +44,31 @@ class MainTests: XCTestCase {
         sendTestResponse(request: request, withExpectedResponse: nil, expectedResponseCode: invalidRequestCode)
 
 
-        postBodyString = [ "authority": "BAD" ,"authorityAccountId": 1, "authorityToken": 1234567890]
+        postBodyString = [ "authority": "BAD", "authorityAccountId": 1, "authorityToken": 1234567890]
         request.httpBody  = try? JSONSerialization.data(withJSONObject: postBodyString, options: .init(rawValue: 0))
         sendTestResponse(request: request, withExpectedResponse: nil, expectedResponseCode: invalidAuthCode)
 
-        postBodyString = [ "authority": "FACEBOOK","authorityToken": 12123123]
+        postBodyString = [ "authority": "FACEBOOK", "authorityToken": 12123123]
         request.httpBody  = try? JSONSerialization.data(withJSONObject: postBodyString, options: .init(rawValue: 0))
         sendTestResponse(request: request, withExpectedResponse: nil, expectedResponseCode: invalidRequestCode)
 
 
-        postBodyString = [ "authority": "FACEBOOK","authorityAccountId": 1123123,"authorityToken": 1234567890]
+        postBodyString = [ "authority": "FACEBOOK", "authorityAccountId": 1123123, "authorityToken": 1234567890]
         request.httpBody  = try? JSONSerialization.data(withJSONObject: postBodyString, options: .init(rawValue: 0))
         sendTestResponse(request: request, withExpectedResponse: nil, expectedResponseCode: invalidAuthCode)
 
 
-        postBodyString = [ "authority": "FACEBOOK","authorityAccountId": validUserId ,"authorityToken": validAuthToken]
+        postBodyString = [ "authority": "FACEBOOK", "authorityAccountId": validUserId, "authorityToken": validAuthToken]
         request.httpBody  = try? JSONSerialization.data(withJSONObject: postBodyString, options: .init(rawValue: 0))
         sendTestResponse(request: request, withExpectedResponse: nil, expectedResponseCode: validErrorCode)
 
 
-        postBodyString = [ "authority": "😗","authorityAccountId": "😗","authorityToken": "😗"]
+        postBodyString = [ "authority": "😗", "authorityAccountId": "😗", "authorityToken": "😗"]
         request.httpBody  = try? JSONSerialization.data(withJSONObject: postBodyString, options: .init(rawValue: 0))
         sendTestResponse(request: request, withExpectedResponse: nil, expectedResponseCode: invalidRequestCode)
 
 
-        postBodyString = [ "authority": "" ,"authorityAccountId": "","authorityToken": ""]
+        postBodyString = [ "authority": "", "authorityAccountId": "", "authorityToken": ""]
         request.httpBody  = try? JSONSerialization.data(withJSONObject: postBodyString, options: .init(rawValue: 0))
         sendTestResponse(request: request, withExpectedResponse: nil, expectedResponseCode: invalidRequestCode)
 
