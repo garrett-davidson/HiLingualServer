@@ -7,6 +7,9 @@ class User {
     private var birthdate: Int
     private var authorityAccountId: String
     private var sessionToken: String
+    private var nativeLanguages: Array<String>
+    private var learningLanguages: Array<String>
+    
 
     init() {
 	self.userId = 0
@@ -17,9 +20,11 @@ class User {
 	self.birthdate = 0
 	self.authorityAccountId = "newAccountId"
 	self.sessionToken = "newSessionToken"
+    self.nativeLanguages = []
+    self.learningLanguages = []
     }
 
-    init(newUserId: Int, newName: String, newDisplayName: String, newBio: String, newGender: Gender, newBirthdate: Int, authorityAccountId: String = "newAccountId", sessionToken: String = "newSessionToken") {
+    init(newUserId: Int, newName: String, newDisplayName: String, newBio: String, newGender: Gender, newBirthdate: Int, authorityAccountId: String = "newAccountId", sessionToken: String = "newSessionToken",nativeLanguages: Array<String> = [], learningLanguages: Array<String> = []) {
 	self.userId = newUserId
 	self.name = newName
 	self.displayName = newDisplayName
@@ -28,6 +33,8 @@ class User {
 	self.birthdate = newBirthdate
 	self.authorityAccountId = authorityAccountId
 	self.sessionToken = sessionToken
+    self.nativeLanguages = nativeLanguages
+    self.learningLanguages = learningLanguages
     }
 
     func getUserId() -> Int {
@@ -60,6 +67,14 @@ class User {
 
     func getSessionToken() -> String {
 	return self.sessionToken
+    }
+
+    func getNativeLanguages() -> Array<String> {
+    return self.nativeLanguages
+    }
+
+    func getLearningLanguages() -> Array<String> {
+    return self.learningLanguages
     }
 
     func setUserId(newUserId: Int) {
@@ -97,4 +112,13 @@ class User {
     func setAuthorityAccountId(newAuthorityAccountId: String) {
 	self.authorityAccountId = newAuthorityAccountId
     }
+
+    func setNativeLanguages(newNativeLanguages: Array<String>) {
+    self.nativeLanguages = newNativeLanguages
+    }
+
+    func setLearningLanguages(newLearningLanguages: Array<String>) {
+    self.learningLanguages = newLearningLanguages
+    }
+
 }

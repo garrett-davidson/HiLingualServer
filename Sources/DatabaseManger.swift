@@ -27,6 +27,7 @@ let createUsersTableQuery = "CREATE TABLE IF NOT EXISTS \(usersTable)(" +
   "gender TINYTEXT, " +
   "birthdate DATETIME, " +
   "session_token LONGTEXT, " +
+  "native_languages LONGTEXT, " +
   "learning_languages LONGTEXT);"
 let createFacebookTableQuery = "CREATE TABLE IF NOT EXISTS \(facebookTable)(" +
   "user_id BIGINT UNIQUE PRIMARY KEY, " +
@@ -268,6 +269,19 @@ func convertRowToUserWith(row: [String?]) -> User? {
         return nil
     }
     newUser.setSessionToken(newSessionToken: sessionToken)
+
+    guard let learningLanguages = row[8] else {
+        return nil
+    }
+    let learningLanguagesArray = learningLanguages.components(separatedBy: ",")
+    newUser.setLearningLanguages(newLearningLanguages: learningLanguagesArray)
+
+    guard let nativeLanguages = row[9] else {
+        return nil
+    }
+    let nativeLanguagesArray = nativeLanguages.components(separatedBy: ",")
+    newUser.setNativeLanguages(newNativeLanguages: nativeLanguagesArray)
+
     return newUser
 }
 
