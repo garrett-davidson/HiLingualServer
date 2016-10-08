@@ -7,8 +7,8 @@ class User {
     private var birthdate: Int
     private var authorityAccountId: String
     private var sessionToken: String
-    private var nativeLanguages: Array<String>
-    private var learningLanguages: Array<String>
+    private var nativeLanguage: String
+    private var learningLanguage: String
     
 
     init() {
@@ -20,11 +20,11 @@ class User {
 	self.birthdate = 0
 	self.authorityAccountId = "newAccountId"
 	self.sessionToken = "newSessionToken"
-    self.nativeLanguages = []
-    self.learningLanguages = []
+    self.nativeLanguage = "Spanish"
+    self.learningLanguage = "English"
     }
 
-    init(newUserId: Int, newName: String, newDisplayName: String, newBio: String, newGender: Gender, newBirthdate: Int, authorityAccountId: String = "newAccountId", sessionToken: String = "newSessionToken",nativeLanguages: Array<String> = [], learningLanguages: Array<String> = []) {
+    init(newUserId: Int, newName: String, newDisplayName: String, newBio: String, newGender: Gender, newBirthdate: Int, authorityAccountId: String = "newAccountId", sessionToken: String = "newSessionToken",nativeLanguage: String = "Spanish", learningLanguage: String = "English") {
 	self.userId = newUserId
 	self.name = newName
 	self.displayName = newDisplayName
@@ -33,8 +33,8 @@ class User {
 	self.birthdate = newBirthdate
 	self.authorityAccountId = authorityAccountId
 	self.sessionToken = sessionToken
-    self.nativeLanguages = nativeLanguages
-    self.learningLanguages = learningLanguages
+    self.nativeLanguage = nativeLanguage
+    self.learningLanguage = learningLanguage
     }
 
     func getUserId() -> Int {
@@ -69,12 +69,12 @@ class User {
 	return self.sessionToken
     }
 
-    func getNativeLanguages() -> Array<String> {
-    return self.nativeLanguages
+    func getNativeLanguage() -> String{
+    return self.nativeLanguage
     }
 
-    func getLearningLanguages() -> Array<String> {
-    return self.learningLanguages
+    func getLearningLanguage() -> String {
+    return self.learningLanguage
     }
 
     func setUserId(newUserId: Int) {
@@ -113,12 +113,12 @@ class User {
 	self.authorityAccountId = newAuthorityAccountId
     }
 
-    func setNativeLanguages(newNativeLanguages: Array<String>) {
-    self.nativeLanguages = newNativeLanguages
+    func setNativeLanguage(newNativeLanguage: String) {
+    self.nativeLanguage = newNativeLanguage
     }
 
-    func setLearningLanguages(newLearningLanguages: Array<String>) {
-    self.learningLanguages = newLearningLanguages
+    func setLearningLanguage(newLearningLanguage: String) {
+    self.learningLanguage = newLearningLanguage
     }
 
 }

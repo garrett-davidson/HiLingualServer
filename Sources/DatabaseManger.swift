@@ -27,8 +27,8 @@ let createUsersTableQuery = "CREATE TABLE IF NOT EXISTS \(usersTable)(" +
   "gender TINYTEXT, " +
   "birthdate DATETIME, " +
   "session_token LONGTEXT, " +
-  "native_languages LONGTEXT, " +
-  "learning_languages LONGTEXT);"
+  "native_language LONGTEXT, " +
+  "learning_language LONGTEXT);"
 let createFacebookTableQuery = "CREATE TABLE IF NOT EXISTS \(facebookTable)(" +
   "user_id BIGINT UNIQUE PRIMARY KEY, " +
   "account_id VARCHAR(255), " +
@@ -270,17 +270,15 @@ func convertRowToUserWith(row: [String?]) -> User? {
     }
     newUser.setSessionToken(newSessionToken: sessionToken)
 
-    guard let learningLanguages = row[8] else {
+    guard let learningLanguage = row[8] else {
         return nil
     }
-    let learningLanguagesArray = learningLanguages.components(separatedBy: ",")
-    newUser.setLearningLanguages(newLearningLanguages: learningLanguagesArray)
+    newUser.setLearningLanguage(newLearningLanguage: learningLanguage)
 
-    guard let nativeLanguages = row[9] else {
+    guard let nativeLanguage = row[9] else {
         return nil
     }
-    let nativeLanguagesArray = nativeLanguages.components(separatedBy: ",")
-    newUser.setNativeLanguages(newNativeLanguages: nativeLanguagesArray)
+    newUser.setNativeLanguage(newNativeLanguage: nativeLanguage)
 
     return newUser
 }
@@ -306,7 +304,29 @@ func isValidSession(sessionToken: String) -> User? {
     } else {
         return nil
     }
-
+}
+func getMatches(nativeLanguages: String, learningLanguage: String, userBirthdate: Int) -> Array<User> {
+    var listOfMatches = [User]()
+    guard dataMysql.query(statement: "SELECT * from hl_users WHERE nativeLanguages = \(learningLanguage) AND learningLanguage = \(nativeLanguages)") else {
+        return listOfMatches
+    }
+    guard let results = dataMysql.storeResults() else {
+        return listOfMatches
+    }
+    guard results.numRows() < 1 else {
+        return listOfMatches
+    }
+    while true {
+        guard let row = results.next() else {
+            break
+        }
+        guard let tempUser = convertRowToUserWith(row: row) else {
+            break
+        }
+        listOfMatches.append(tempUser)
+    }
+    let sortedArray = listOfMatches.sorted {abs($0.getBirthdate() - userBirthdate) < abs($1.getBirthdate() - userBirthdate)}
+    return sortedArray
 }
 
 func getUser(userId: Int) -> User? {
