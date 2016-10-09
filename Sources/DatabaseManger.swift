@@ -354,13 +354,13 @@ func getUser(userId: Int) -> User? {
     }
 }
 
-func getMessages(withSessionToken token: String, forUser receivingUserId:Int) -> [Message]? {
+func getMessages(withSessionToken token: String, forUser receivingUserId: Int) -> [Message]? {
 
     guard let requestingUser = lookupUserWith(sessionToken: token) else {
         return nil
     }
 
-    let requestingUserId = requestingUser.getUserId();
+    let requestingUserId = requestingUser.getUserId()
 
     // TODO: Limit number of results
     guard dataMysql.query(statement: "SELECT * FROM hl_chat_messages WHERE (sender_id = \(requestingUserId) AND receiver_id = \(receivingUserId)) OR (sender_id = \(receivingUserId) AND receiver_id = \(requestingUserId));") else {

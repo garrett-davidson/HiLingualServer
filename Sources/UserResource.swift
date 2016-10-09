@@ -120,7 +120,7 @@ func editUserInfo(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
         badRequestResponse(response: response)
         return
     }
-    let user = User(newUserId: userId, newName: name, newDisplayName: displayName, newBio: bio, newGender: gender, newBirthdate: birthdate,nativeLanguage: nativeLanguage,learningLanguage: learningLanguage)
+    let user = User(newUserId: userId, newName: name, newDisplayName: displayName, newBio: bio, newGender: gender, newBirthdate: birthdate, nativeLanguage: nativeLanguage, learningLanguage: learningLanguage)
 
 
     if verifyAuthToken(request: request, response, requestBodyDic) {
@@ -132,7 +132,7 @@ func editUserInfo(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
 
 
 
-func getMatchList(request: HTTPRequest, _ response: HTTPResponse,_ requestBodyDic: Dictionary<String, AnyObject>) {
+func getMatchList(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: Dictionary<String, AnyObject>) {
     print("Getting User matches")
     guard let userId = requestBodyDic["userId"] as? Int else {
         print("bad request")
@@ -146,10 +146,10 @@ func getMatchList(request: HTTPRequest, _ response: HTTPResponse,_ requestBodyDi
             badRequestResponse(response: response)
             return
         }
-        let age = curUser.getBirthdate();
-        let nativeLanguages = curUser.getNativeLanguage();
-        let learningLanguage = curUser.getLearningLanguage();
-        let arrayOfMatches = getMatches(nativeLanguages: nativeLanguages,learningLanguage:learningLanguage,userBirthdate: age)
+        let age = curUser.getBirthdate()
+        let nativeLanguages = curUser.getNativeLanguage()
+        let learningLanguage = curUser.getLearningLanguage()
+        let arrayOfMatches = getMatches(nativeLanguages: nativeLanguages, learningLanguage:learningLanguage, userBirthdate: age)
 
         do {
             let encodedJSON = try arrayOfMatches.jsonEncodedString()
@@ -157,26 +157,11 @@ func getMatchList(request: HTTPRequest, _ response: HTTPResponse,_ requestBodyDi
         } catch {
             if verbose {print(error)}
             return
-        } 
+        }
 
-       
+
 
     } else {
        errorResponse(response: response)
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -9,7 +9,7 @@ class User {
     private var sessionToken: String
     private var nativeLanguage: String
     private var learningLanguage: String
-    
+
 
     init() {
 	self.userId = 0
@@ -24,7 +24,7 @@ class User {
     self.learningLanguage = "English"
     }
 
-    init(newUserId: Int, newName: String, newDisplayName: String, newBio: String, newGender: Gender, newBirthdate: Int, authorityAccountId: String = "newAccountId", sessionToken: String = "newSessionToken",nativeLanguage: String = "Spanish", learningLanguage: String = "English") {
+    init(newUserId: Int, newName: String, newDisplayName: String, newBio: String, newGender: Gender, newBirthdate: Int, authorityAccountId: String = "newAccountId", sessionToken: String = "newSessionToken", nativeLanguage: String = "Spanish", learningLanguage: String = "English") {
 	self.userId = newUserId
 	self.name = newName
 	self.displayName = newDisplayName
@@ -69,7 +69,7 @@ class User {
 	return self.sessionToken
     }
 
-    func getNativeLanguage() -> String{
+    func getNativeLanguage() -> String {
     return self.nativeLanguage
     }
 
