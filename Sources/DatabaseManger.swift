@@ -1,5 +1,6 @@
 import MySQL
 import Foundation
+
 let testHost = "127.0.0.1"
 let testUser = "test"
 
@@ -146,7 +147,6 @@ func overwriteUserData(user: User) {
     print("updated user to table")
 }
 
-
 func createUserWith(token: String) -> User? {
     let newUser = User()
     guard dataMysql.query(statement: "INSERT INTO hl_users (session_token) VALUES(\"\(token)\");") else {
@@ -180,14 +180,15 @@ func createUserWith(token: String) -> User? {
     newUser.setUserId(newUserId: newUserId)
     return newUser
 }
+
 func logoutUserWith(userId: Int, sessionId: String) -> Bool {
     print("logging out")
     guard dataMysql.query(statement: "UPDATE hl_users SET session_token = \"\" WHERE session_token = \(sessionId)") else {
         return false
     }
     return true
-
 }
+
 func loginUserWith(authAccountId: String, sessionId: String) -> User? {
     print("logging in user")
     guard dataMysql.query(statement: "SELECT * from hl_users WHERE auth_account_id = \(authAccountId)") else {
@@ -283,8 +284,11 @@ func convertRowToUserWith(row: [String?]) -> User? {
     return newUser
 }
 
-func isValidSession(sessionToken: String) -> User? {
+func lookupUserWith(sessionToken: String) -> User? {
     guard dataMysql.query(statement: "SELECT * from hl_users WHERE sessionToken = \(sessionToken)") else {
+        if verbose {
+            print("User with given session token does not exist")
+        }
         return nil
     }
     guard let results = dataMysql.storeResults() else {
@@ -299,13 +303,11 @@ func isValidSession(sessionToken: String) -> User? {
     guard let tempUser = convertRowToUserWith(row: row) else {
         return nil
     }
-    if tempUser.getSessionToken() == sessionToken {
-        return tempUser
-    } else {
-        return nil
-    }
+
+    return tempUser.getSessionToken() == sessionToken ? tempUser : nil
 }
-func getMatches(nativeLanguages: String, learningLanguage: String, userBirthdate: Int) -> Array<User> {
+
+func getMatches(nativeLanguages: String, learningLanguage: String, userBirthdate: Int) -> [User] {
     var listOfMatches = [User]()
     guard dataMysql.query(statement: "SELECT * from hl_users WHERE nativeLanguages = \(learningLanguage) AND learningLanguage = \(nativeLanguages)") else {
         return listOfMatches
@@ -350,6 +352,92 @@ func getUser(userId: Int) -> User? {
     } else {
         return nil
     }
+}
+
+func getMessages(withSessionToken token: String, forUser receivingUserId:Int) -> [Message]? {
+
+    guard let requestingUser = lookupUserWith(sessionToken: token) else {
+        return nil
+    }
+
+    let requestingUserId = requestingUser.getUserId();
+
+    // TODO: Limit number of results
+    guard dataMysql.query(statement: "SELECT * FROM hl_chat_messages WHERE (sender_id = \(requestingUserId) AND receiver_id = \(receivingUserId)) OR (sender_id = \(receivingUserId) AND receiver_id = \(requestingUserId));") else {
+        return nil
+    }
+
+    var messages = [Message]()
+
+    let results = dataMysql.storeResults()
+
+    while let row = results?.next() {
+        if let message = messageFrom(row: row) {
+            messages.append(message)
+        }
+    }
+
+    return messages
+}
+
+func messageFrom(row: [String?]) -> Message? {
+    guard row.count >= 7 else {
+        if verbose {
+            print("Not enough columns for message")
+        }
+
+        return nil
+    }
+
+    guard let idString = row[0], let id = Int(idString) else {
+        if verbose {
+            print("Invalid message id")
+        }
+
+        return nil
+    }
+
+    guard let sentTimestampString = row[1],
+          let sentTimestampInterval = Double(sentTimestampString) else {
+        if verbose {
+            print("Invalid sent timestamp")
+        }
+        return nil
+    }
+
+    let sentTimestamp = Date(timeIntervalSince1970: sentTimestampInterval)
+    let editTimestamp: Date?
+
+    if let editTimestampString = row[2], let editTimestampInterval = Double(editTimestampString) {
+        editTimestamp = Date(timeIntervalSince1970: editTimestampInterval)
+    } else {
+        editTimestamp = nil
+    }
+
+    guard let senderIdString = row[3], let senderId = Int(senderIdString) else {
+        if verbose {
+            print("Invalid sender id")
+        }
+        return nil
+    }
+
+    guard let receiverIdString = row[4], let receiverId = Int(receiverIdString) else {
+        if verbose {
+            print("Invalid receiver id")
+        }
+        return nil
+    }
+
+    guard let message = row[5]?.fromBase64() else {
+        if verbose {
+            print("Invalid message body")
+        }
+        return nil
+    }
+
+    let editedMessage = row[6]?.fromBase64()
+
+    return Message(messageId: id, sentTimestamp: sentTimestamp, editTimestamp: editTimestamp, sender: senderId, receiver: receiverId, body: message, editedBody: editedMessage)
 }
 
 extension String {

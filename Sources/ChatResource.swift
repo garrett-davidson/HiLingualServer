@@ -4,6 +4,16 @@ import AppKit
 import AVFoundation
 import Foundation
 
+struct Message {
+    let messageId: Int
+    let sentTimestamp: Date
+    let editTimestamp: Date?
+    let sender: Int
+    let receiver: Int
+    let body: String
+    let editedBody: String?
+}
+
 func handleChat(request: HTTPRequest, _ response: HTTPResponse) {
     //parse uri and call relevant funtion
     response.setHeader(.contentType, value: "text/html")
