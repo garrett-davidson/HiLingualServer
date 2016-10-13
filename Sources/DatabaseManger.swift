@@ -9,6 +9,7 @@ let messagesTable = "hl_chat_messages"
 let usersTable = "hl_users"
 let facebookTable = "hl_facebook_data"
 let googleTable = "hl_google_data"
+let flashcardTable = "hl_flashcards"
 
 let createMessagesTableQuery = "CREATE TABLE IF NOT EXISTS \(messagesTable)(" +
   "message_id BIGINT UNIQUE PRIMARY KEY AUTO_INCREMENT, " +
@@ -30,6 +31,11 @@ let createUsersTableQuery = "CREATE TABLE IF NOT EXISTS \(usersTable)(" +
   "session_token LONGTEXT, " +
   "native_language LONGTEXT, " +
   "learning_language LONGTEXT);"
+let createFlashcardTableQuery = "CREATE TABLE IF NOT EXISTS \(flashcardTable)(" +
+    "user_id BIGINT, " +
+    "setId TINYTEXT, " +
+    "front TINYTEXT, " +
+    "back TINYTEXT);"
 let createFacebookTableQuery = "CREATE TABLE IF NOT EXISTS \(facebookTable)(" +
   "user_id BIGINT UNIQUE PRIMARY KEY, " +
   "account_id VARCHAR(255), " +
@@ -87,6 +93,11 @@ func setupMysql(forSchema schema: String) {
         print("Creating table \(createGoogleTableQuery)")
         guard dataMysql.query(statement: "\(createGoogleTableQuery)") else {
             print("Error creating google auth table")
+            return
+        }
+        print("Creating table \(createFlashcardTableQuery)")
+        guard dataMysql.query(statement: "\(createFlashcardTableQuery)") else {
+            print("Error creating flashcardTable table")
             return
         }
     } else {
@@ -224,6 +235,24 @@ func isValid(userId: Int) -> Bool {
     return dataMysql.storeResults()?.numRows() == 1
 }
 
+func convertRowToFlashcard(row: [String?]) -> Flashcard? {
+    guard row.count == 4 else {
+        return nil
+    }
+    guard let front = row[2] else {
+        return nil
+    }
+    guard let back = row[3] else {
+        return nil
+    }
+    let newFlashcard = Flashcard()
+    newFlashcard.setFront(newFront: front)
+    newFlashcard.setBack(newBack: back)
+    return newFlashcard
+
+
+}
+
 func convertRowToUserWith(row: [String?]) -> User? {
     let newUser = User()
     guard row.count == 8 else {
@@ -285,22 +314,34 @@ func convertRowToUserWith(row: [String?]) -> User? {
 }
 
 func lookupUserWith(sessionToken: String) -> User? {
-    guard dataMysql.query(statement: "SELECT * from hl_users WHERE sessionToken = \(sessionToken)") else {
+    guard dataMysql.query(statement: "SELECT * FROM hl_users WHERE session_token = \"\(sessionToken)\";") else {
         if verbose {
             print("User with given session token does not exist")
         }
         return nil
     }
     guard let results = dataMysql.storeResults() else {
+        if verbose {
+            print("no results")
+        }
         return nil
     }
     guard results.numRows() == 1 else {
+        if verbose {
+            print("results != 1")
+        }
         return nil
     }
     guard let row = results.next() else {
+        if verbose {
+            print("results.next() doesn't exist")
+        }
         return nil
     }
     guard let tempUser = convertRowToUserWith(row: row) else {
+        if verbose {
+            print("cannot convert to user")
+        }
         return nil
     }
 
@@ -329,6 +370,28 @@ func getMatches(nativeLanguages: String, learningLanguage: String, userBirthdate
     }
     let sortedArray = listOfMatches.sorted {abs($0.getBirthdate() - userBirthdate) < abs($1.getBirthdate() - userBirthdate)}
     return sortedArray
+}
+
+func getFlashcards(userId: Int, setId: String) -> [Flashcard] {
+    var listOfFlashcards = [Flashcard]()
+    guard dataMysql.query(statement: "SELECT * from hl_flashcards WHERE user_id = \(userId) AND setId = \"\(setId)\"") else {
+        print("none1")
+        return listOfFlashcards
+    }
+    guard let results = dataMysql.storeResults() else {
+        print("none2")
+        return listOfFlashcards
+    }
+    while true {
+        guard let row = results.next() else {
+            break
+        }
+        guard let tempFlashcard = convertRowToFlashcard(row: row) else {
+            break
+        }
+        listOfFlashcards.append(tempFlashcard)
+    }
+    return listOfFlashcards
 }
 
 func getUser(userId: Int) -> User? {
@@ -362,7 +425,7 @@ func getMessages(withSessionToken token: String, forUser receivingUserId: Int) -
 
     let requestingUserId = requestingUser.getUserId()
 
-    // TODO: Limit number of results
+    // todo: Limit number of results
     guard dataMysql.query(statement: "SELECT * FROM hl_chat_messages WHERE (sender_id = \(requestingUserId) AND receiver_id = \(receivingUserId)) OR (sender_id = \(receivingUserId) AND receiver_id = \(requestingUserId));") else {
         return nil
     }
@@ -378,6 +441,46 @@ func getMessages(withSessionToken token: String, forUser receivingUserId: Int) -
     }
 
     return messages
+}
+
+func checkFlashcards(setId: String, userId: Int) -> Bool {
+    guard dataMysql.query(statement: "SELECT * from hl_flashcards WHERE user_id = \(userId) AND setId = \"\(setId)\";" ) else {
+
+        return false
+    }
+    guard let results = dataMysql.storeResults() else {
+        print("dataMysql is nil")
+        return false
+    }
+    return results.numRows() > 0
+
+}
+
+func editFlashcards(setId: String, userId: Int, flashcards: [Flashcard]) {
+    guard dataMysql.query(statement: "DELETE FROM hl_flashcards WHERE user_id = \(userId) AND setId = \"\(setId)\";") else {
+        print("Error editing into hl_flashcards")
+        return
+    }
+    for flashcard in flashcards {
+        print(flashcard.getFront())
+        guard dataMysql.query(statement: "INSERT INTO hl_flashcards VALUE (\(userId),\"\(setId)\", \"\(flashcard.getFront())\",\"\(flashcard.getBack())\");") else {
+            print("Error inserting into hl_flashcards")
+            return
+        }
+        print("added flashcard to hl_flashcards to table")
+    }
+
+}
+
+func storeFlashcards(setId: String, userId: Int, flashcards: [Flashcard]) {
+    for flashcard in flashcards {
+        print(flashcard.getFront())
+        guard dataMysql.query(statement: "INSERT INTO hl_flashcards VALUE (\(userId),\"\(setId)\", \"\(flashcard.getFront())\",\"\(flashcard.getBack())\");") else {
+            print("Error inserting into hl_flashcards")
+            return
+        }
+        print("added flashcard to hl_flashcards to table")
+    }
 }
 
 func messageFrom(row: [String?]) -> Message? {

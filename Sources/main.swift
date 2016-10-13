@@ -38,6 +38,8 @@ func runServer() {
     routes.add(method: .get, uri: "/chat/**", handler: handleChat)
     routes.add(method: .post, uri: "/picture", handler: handlePicture)
     routes.add(method: .post, uri: "/audio", handler: handleAudio)
+    routes.add(method: .get, uri: "/flashcard", handler: handleFlashcard)
+    routes.add(method: .post, uri: "/flashcard/**", handler: handleFlashcardUpdate)
 
     signal(SIGINT) { signal in
         print("Received signal")
