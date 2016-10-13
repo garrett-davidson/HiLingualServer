@@ -98,7 +98,7 @@ func setupMysql(forSchema schema: String) {
     }
 }
 
-func addMessageToTable(auth: String, recipient: Int, message: String) {
+func addMessageToTable(sender: Int, recipient: Int, message: String) {
     guard let encodedMessage = message.toBase64() else {
         print("Unable to encode message")
         return
@@ -110,7 +110,7 @@ func addMessageToTable(auth: String, recipient: Int, message: String) {
     print("added message to table")
 }
 
-func addAudioMessageToTable(auth: String, recipient: Int, audio: String) {
+func addAudioMessageToTable(sender: Int, recipient: Int, audio: String) {
     guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,1,\(recipient),NULL,NULL,NULL,\"\(audio)\");") else {
         print("Error inserting into hl_chat_messages with audio")
         return
@@ -118,7 +118,7 @@ func addAudioMessageToTable(auth: String, recipient: Int, audio: String) {
     print("added to audio message to table")
 
 }
-func addPictureMessageToTable(auth: String, recipient: Int, picture: String) {
+func addPictureMessageToTable(sender: Int, recipient: Int, picture: String) {
     guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,1,\(recipient),NULL,NULL,\"\(picture)\",NULL);") else {
         print("Error inserting into hl_chat_messages with audio")
         return
