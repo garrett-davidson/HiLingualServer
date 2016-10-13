@@ -3,31 +3,28 @@ import Foundation
 import PerfectHTTP
 
 extension String {
-   var isAlphanumeric: Bool {
-       return range(of: "^[a-zA-Z0-9]+$", options: .regularExpression) != nil
-   }
+    var isAlphanumeric: Bool {
+        return range(of: "^[a-zA-Z0-9]+$", options: .regularExpression) != nil
+    }
 }
 let verbose = false
+
 func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
     //parse uri and call relevant funtion
     //response.setHeader(.contentType, value: "text/html")
     if verbose {print("starter")}
     defer {
-	response.completed()
+        response.completed()
     }
 
     guard var urlString = request.urlVariables[routeTrailingWildcardKey] else {
         if verbose {print("bad request, no urlstring")}
         badRequestResponse(response: response)
-    	return
-    }
-
-    //deserialize request JSON body to Dictionary
-    guard request.postBodyString != nil else {
         return
     }
 
-    guard let jsonString: String = request.postBodyString else {
+    //deserialize request JSON body to Dictionary
+    guard let jsonString = request.postBodyString else {
         if verbose {
             print("Empty body")
             print("bad request, nojson body")
@@ -36,47 +33,28 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
         return
     }
 
+    // swiftlint:disable opening_brace
+    var urlStringArray = urlString.characters.split{$0 == "/"}.map(String.init)
     do {
-	guard let result = try jsonString.jsonDecode() as? [String: AnyObject] else {
-	    if verbose {print("invalid json string, nil")}
-        badRequestResponse(response: response)
-	    return
-	}
-
-        // swiftlint:disable opening_brace
-	var urlStringArray = urlString.characters.split{$0 == "/"}.map(String.init)
-	do {
-	    guard let result = try jsonString.jsonDecode() as? Dictionary<String, AnyObject> else {
-		if verbose {print("invalid json string")}
-		return
-	    }
-	    //validate request
-	    if urlStringArray[0] == "login" {
-		loginWith(request: request, response, result)
-	    } else if urlStringArray[0] == "register" {
-		registerWith(request: request, response, result)
-	    } else if urlStringArray[0] == "logout" {
-		logoutWith(request: request, response, result)
-	    }
-	    response.completed()
-	} catch {
-	    if verbose {print("bad request, invalid json syntax")}
-	    badRequestResponse(response: response)
-	    return
-	}
-
-	print(urlString)
-	if urlString == "login" {
-	    loginWith(request: request, response, result)
-	} else if urlString == "register" {
-	    registerWith(request: request, response, result)
-	} else if urlString == "logout" {
-	    logoutWith(request: request, response, result)
-	}
+        guard let result = try jsonString.jsonDecode() as? [String: AnyObject] else {
+            if verbose {print("invalid json string")}
+            return
+        }
+        //validate request
+        if urlStringArray[0] == "login" {
+            loginWith(request: request, response, result)
+        } else if urlStringArray[0] == "register" {
+            registerWith(request: request, response, result)
+        } else if urlStringArray[0] == "logout" {
+            logoutWith(request: request, response, result)
+        } else {
+            badRequestResponse(response: response)
+        }
+        response.completed()
     } catch {
-	if verbose {print("bad request, invalid json body")}
-	badRequestResponse(response: response)
-	return
+        if verbose {print("bad request, invalid json syntax")}
+        badRequestResponse(response: response)
+        return
     }
 }
 
@@ -84,31 +62,26 @@ func verifyAuthToken(request: HTTPRequest, _ response: HTTPResponse, _ requestBo
     //https://graph.facebook.com/me?access_token=xxxxxxxxxxxxxxxxx     FACEBOOK URL
     //
     guard let token = requestBodyDic["authorityToken"] as? String else {
-   	    if verbose {print("no auth token sent")}
+        if verbose {print("no auth token sent")}
         badRequestResponse(response: response)
-   	    return false
+        return false
     }
     guard let auth = requestBodyDic["authority"] as? String else {
-   	if verbose {print("no authority sent")}
-   	return false
+        if verbose {print("no authority sent")}
+        return false
     }
     if auth == "FACEBOOK" {
-        let result = checkFacebookAuthority(token)
-        if result {
-            return result
-        } else {
-            unauthorizedResponse(response: response)
+        if checkFacebookAuthority(token) {
+            return true
         }
-    	return checkFacebookAuthority(token)
+        unauthorizedResponse(response: response)
     } else if auth == "GOOGLE" {
-        let result = checkGoogleAuthority(token)
-        if result {
-            return result
-        } else {
-            unauthorizedResponse(response: response)
+        if checkGoogleAuthority(token) {
+            return true
         }
+        unauthorizedResponse(response: response)
     } else {
-	    if verbose {print("bad authority sent")}
+        if verbose {print("bad authority sent")}
         unauthorizedResponse(response: response)
     }
     return false
@@ -117,14 +90,14 @@ func verifyAuthToken(request: HTTPRequest, _ response: HTTPResponse, _ requestBo
 func checkGoogleAuthority(_ token: String) -> Bool {
     let scriptURL = "https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=\(token)"
     guard let myUrl = URL(string: scriptURL) else {
-    	return false
+        return false
     }
-    let request1: URLRequest = URLRequest(url: myUrl)
+    let request1 = URLRequest(url: myUrl)
     do {
-	var response: URLResponse?
+        var response: URLResponse?
 
-	try NSURLConnection.sendSynchronousRequest(request1, returning: &response)
-    	if let httpResponse = response as? HTTPURLResponse {
+        try NSURLConnection.sendSynchronousRequest(request1, returning: &response)
+        if let httpResponse = response as? HTTPURLResponse {
             return httpResponse.statusCode == 200
         }
     } catch let error as NSError {
@@ -136,11 +109,11 @@ func checkGoogleAuthority(_ token: String) -> Bool {
 func checkFacebookAuthority(_ token: String) -> Bool {
     let scriptURL = "https://graph.facebook.com/me?access_token=\(token)"
     guard let myUrl = URL(string: scriptURL) else {
-    	return false
+        return false
     }
     let request1: URLRequest = URLRequest(url: myUrl)
     do {
-	var response: URLResponse?
+        var response: URLResponse?
 
         try NSURLConnection.sendSynchronousRequest(request1, returning: &response)
         if let httpResponse = response as? HTTPURLResponse {
@@ -164,10 +137,12 @@ func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic:
         return
     }
     guard let authorityAccountId = requestBodyDic["authorityAccountId"] as? String else {
+        if verbose {print("no authID sent")}
         badRequestResponse(response: response)
         return
     }
     guard let authorityToken = requestBodyDic["authorityToken"] as? String else {
+        if verbose {print("no auth token sent")}
         badRequestResponse(response: response)
         return
     }
@@ -176,19 +151,7 @@ func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic:
         return
     }
     if verifyAuthToken(request: request, response, requestBodyDic) {
-	guard let token = requestBodyDic["authorityToken"] as? String else {
-	    if verbose {print("no auth token sent")}
-	    badRequestResponse(response: response)
-	    return
-    	}
-    	guard let authID = requestBodyDic["authorityAccountId"] as? String else {
-	    if verbose {print("no authID sent")}
-	    badRequestResponse(response: response)
-	    return
-    	}
-    	let _ = loginUserWith(authAccountId: authID, sessionId: token)
-    } else {
-        return
+        loginUserWith(authAccountId: authorityAccountId, sessionId: authorityToken)
     }
 }
 
@@ -199,15 +162,13 @@ func logoutWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic
         badRequestResponse(response: response)
         return
     }
-	guard let userId = requestBodyDic["user_id"] as? String, let userIdInt = Int(userId) else {
-	    if verbose { print("no authID sent")}
-	    badRequestResponse(response: response)
-	    return
-	}
+    guard let userId = requestBodyDic["user_id"] as? String, let userIdInt = Int(userId) else {
+        if verbose { print("no authID sent")}
+        badRequestResponse(response: response)
+        return
+    }
     if verifyAuthToken(request: request, response, requestBodyDic) {
-		let _ = logoutUserWith(userId: userIdInt, sessionId: auth)
-    } else {
-    	return
+        logoutUserWith(userId: userIdInt, sessionId: auth)
     }
 }
 
@@ -235,24 +196,22 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
         return
     }
     if verifyAuthToken(request: request, response, requestBodyDic) {
-	guard let token = requestBodyDic["authorityToken"] as? String else {
-	    if verbose {print("no auth token sent")}
-	    return
-	}
+        guard let token = requestBodyDic["authorityToken"] as? String else {
+            if verbose {print("no auth token sent")}
+            return
+        }
 
-	guard let user = createUserWith(token: token) else {
-	    if verbose {print("database error")}
-	    return
-	}
+        guard let user = createUserWith(token: token) else {
+            if verbose {print("database error")}
+            return
+        }
 
-	let dict: [String: Any] = ["userId": user.getUserId(), "sessionId": user.getSessionToken()]
-	do {
-	    try response.setBody(json: dict)
-	} catch {
-	    if verbose {print(error)}
-	}
-    } else {
-	   return
+        let dict: [String: Any] = ["userId": user.getUserId(), "sessionId": user.getSessionToken()]
+        do {
+            try response.setBody(json: dict)
+        } catch {
+            if verbose {print(error)}
+        }
     }
 
     //create new user in database

@@ -182,7 +182,7 @@ func createUserWith(token: String) -> User? {
     return newUser
 }
 
-func logoutUserWith(userId: Int, sessionId: String) -> Bool {
+@discardableResult func logoutUserWith(userId: Int, sessionId: String) -> Bool {
     print("logging out")
     guard dataMysql.query(statement: "UPDATE hl_users SET session_token = \"\" WHERE session_token = \(sessionId)") else {
         return false
@@ -190,7 +190,7 @@ func logoutUserWith(userId: Int, sessionId: String) -> Bool {
     return true
 }
 
-func loginUserWith(authAccountId: String, sessionId: String) -> User? {
+@discardableResult func loginUserWith(authAccountId: String, sessionId: String) -> User? {
     print("logging in user")
     guard dataMysql.query(statement: "SELECT * from hl_users WHERE auth_account_id = \(authAccountId)") else {
         return nil
