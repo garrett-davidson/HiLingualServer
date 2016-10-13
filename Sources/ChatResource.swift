@@ -79,7 +79,15 @@ func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         return
     }
 
-    addMessageToTable(auth: auth, recipient: recipient, message: message)
+    guard let sender = lookupUserWith(sessionToken: auth) else {
+        print("Invalid auth")
+        invalidAuth(request: request, response)
+        return
+    }
+
+    addMessageToTable(sender: sender.getUserId(), recipient: recipient, message: message)
+    let notification = NSNotification(name: NSNotification.Name(rawValue: "Received message"), object: nil, userInfo: ["Sender": sender, "Recipient": recipient, "Message": message])
+    send(notification: notification, toUser: recipient)
 }
 
 func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
@@ -142,12 +150,22 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         return
     }
 
+
+    guard let sender = lookupUserWith(sessionToken: auth) else {
+        print("Invalid auth")
+        invalidAuth(request: request, response)
+        return
+    }
+
     if let picture = storePicture(atPath: uploads[0].tmpFileName) {
-        addPictureMessageToTable(auth: auth, recipient: recipient, picture: picture)
+        addPictureMessageToTable(sender: sender.getUserId(), recipient: recipient, picture: picture)
     } else {
         response.setHeader(.contentType, value: "text/html")
         response.setBody(string: "<html><title>chat</title><body>Unable to save picture</body></html>")
     }
+
+    let notification = NSNotification(name: NSNotification.Name(rawValue: "Received picture message"), object: nil, userInfo: ["Sender": sender, "Recipient": recipient])
+    send(notification: notification, toUser: recipient)
 }
 
 func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
@@ -213,12 +231,21 @@ func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         return
     }
 
+    guard let sender = lookupUserWith(sessionToken: auth) else {
+        print("Invalid auth")
+        invalidAuth(request: request, response)
+        return
+    }
+
     if let audio = storeAudio(atPath: uploads[0].tmpFileName) {
-        addAudioMessageToTable(auth: auth, recipient: recipient, audio: audio)
+        addAudioMessageToTable(sender: sender.getUserId(), recipient: recipient, audio: audio)
     } else {
         response.setHeader(.contentType, value: "text/html")
         response.setBody(string: "<html><title>chat</title><body>Unable to save audio</body></html>")
     }
+
+    let notification = NSNotification(name: NSNotification.Name(rawValue: "Received audio message"), object: nil, userInfo: ["Sender": sender, "Recipient": recipient])
+    send(notification: notification, toUser: recipient)
 }
 
 func storePicture(atPath srcPath: String) -> String? {
@@ -275,7 +302,25 @@ func storeAudio(atPath srcPath: String) -> String? {
     }
 }
 
+func invalidAuth(request: HTTPRequest, _ response: HTTPResponse) {
+    response.setHeader(.contentType, value: "text/html")
+    response.setBody(string: "<html><title>chat</title><body>Invalid authentication!</body></html>")
+}
+
 func invalidMessage(request: HTTPRequest, _ response: HTTPResponse) {
     response.setHeader(.contentType, value: "text/html")
     response.setBody(string: "<html><title>chat</title><body>Invalid message!</body></html>")
+}
+
+@discardableResult func send(notification: NSNotification, toUser userId: Int) -> Bool {
+    guard let token = apnsToken(forUser: userId) else {
+        if verbose {
+            print("Unable to retrieve token")
+        }
+        return false
+    }
+
+    print("Sending notification to \(userId) with token \(token)")
+    print(notification)
+    return true
 }

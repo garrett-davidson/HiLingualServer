@@ -30,12 +30,14 @@ let createUsersTableQuery = "CREATE TABLE IF NOT EXISTS \(usersTable)(" +
   "birthdate DATETIME, " +
   "session_token LONGTEXT, " +
   "native_language LONGTEXT, " +
-  "learning_language LONGTEXT);"
+  "learning_language LONGTEXT, " +
+  "apns_token LONGTEXT);"
+
 let createFlashcardTableQuery = "CREATE TABLE IF NOT EXISTS \(flashcardTable)(" +
     "user_id BIGINT, " +
     "setId TINYTEXT, " +
     "front TINYTEXT, " +
-    "back TINYTEXT);"
+"back TINYTEXT);"
 let createFacebookTableQuery = "CREATE TABLE IF NOT EXISTS \(facebookTable)(" +
   "user_id BIGINT UNIQUE PRIMARY KEY, " +
   "account_id VARCHAR(255), " +
@@ -109,7 +111,7 @@ func setupMysql(forSchema schema: String) {
     }
 }
 
-func addMessageToTable(auth: String, recipient: Int, message: String) {
+func addMessageToTable(sender: Int, recipient: Int, message: String) {
     guard let encodedMessage = message.toBase64() else {
         print("Unable to encode message")
         return
@@ -121,7 +123,7 @@ func addMessageToTable(auth: String, recipient: Int, message: String) {
     print("added message to table")
 }
 
-func addAudioMessageToTable(auth: String, recipient: Int, audio: String) {
+func addAudioMessageToTable(sender: Int, recipient: Int, audio: String) {
     guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,1,\(recipient),NULL,NULL,NULL,\"\(audio)\");") else {
         print("Error inserting into hl_chat_messages with audio")
         return
@@ -129,7 +131,7 @@ func addAudioMessageToTable(auth: String, recipient: Int, audio: String) {
     print("added to audio message to table")
 
 }
-func addPictureMessageToTable(auth: String, recipient: Int, picture: String) {
+func addPictureMessageToTable(sender: Int, recipient: Int, picture: String) {
     guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,1,\(recipient),NULL,NULL,\"\(picture)\",NULL);") else {
         print("Error inserting into hl_chat_messages with audio")
         return
@@ -192,7 +194,7 @@ func createUserWith(token: String) -> User? {
     return newUser
 }
 
-func logoutUserWith(userId: Int, sessionId: String) -> Bool {
+@discardableResult func logoutUserWith(userId: Int, sessionId: String) -> Bool {
     print("logging out")
     guard dataMysql.query(statement: "UPDATE hl_users SET session_token = \"\" WHERE session_token = \(sessionId)") else {
         return false
@@ -200,7 +202,7 @@ func logoutUserWith(userId: Int, sessionId: String) -> Bool {
     return true
 }
 
-func loginUserWith(authAccountId: String, sessionId: String) -> User? {
+@discardableResult func loginUserWith(authAccountId: String, sessionId: String) -> User? {
     print("logging in user")
     guard dataMysql.query(statement: "SELECT * from hl_users WHERE auth_account_id = \(authAccountId)") else {
         return nil
@@ -541,6 +543,24 @@ func messageFrom(row: [String?]) -> Message? {
     let editedMessage = row[6]?.fromBase64()
 
     return Message(messageId: id, sentTimestamp: sentTimestamp, editTimestamp: editTimestamp, sender: senderId, receiver: receiverId, body: message, editedBody: editedMessage)
+}
+
+func apnsToken(forUser user: Int) -> String? {
+    guard dataMysql.query(statement: "SELECT apns_token FROM hl_users WHERE user_id = \(user);") else {
+        if verbose {
+            print("Query failed")
+        }
+        return nil
+    }
+
+    guard let result = dataMysql.storeResults()?.next() else {
+        if verbose {
+            print("Unable to find apns token for user: \(user)")
+        }
+        return nil
+    }
+
+    return result.first ?? nil
 }
 
 extension String {
