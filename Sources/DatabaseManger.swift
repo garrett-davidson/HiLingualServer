@@ -29,7 +29,8 @@ let createUsersTableQuery = "CREATE TABLE IF NOT EXISTS \(usersTable)(" +
   "birthdate DATETIME, " +
   "session_token LONGTEXT, " +
   "native_language LONGTEXT, " +
-  "learning_language LONGTEXT);"
+  "learning_language LONGTEXT, " +
+  "apns_token LONGTEXT);"
 let createFacebookTableQuery = "CREATE TABLE IF NOT EXISTS \(facebookTable)(" +
   "user_id BIGINT UNIQUE PRIMARY KEY, " +
   "account_id VARCHAR(255), " +
@@ -438,6 +439,24 @@ func messageFrom(row: [String?]) -> Message? {
     let editedMessage = row[6]?.fromBase64()
 
     return Message(messageId: id, sentTimestamp: sentTimestamp, editTimestamp: editTimestamp, sender: senderId, receiver: receiverId, body: message, editedBody: editedMessage)
+}
+
+func apnsToken(forUser user: Int) -> String? {
+    guard dataMysql.query(statement: "SELECT apns_token FROM hl_users WHERE user_id = \(user);") else {
+        if verbose {
+            print("Query failed")
+        }
+        return nil
+    }
+
+    guard let result = dataMysql.storeResults()?.next() else {
+        if verbose {
+            print("Unable to find apns token for user: \(user)")
+        }
+        return nil
+    }
+
+    return result.first ?? nil
 }
 
 extension String {
