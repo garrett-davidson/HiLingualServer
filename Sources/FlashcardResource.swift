@@ -16,7 +16,7 @@ func requestFlashcards(request: HTTPRequest, _ response: HTTPResponse) {
         invalidFlashcard(request: request, response)
         return
     }
-    guard let setId = request.param(name: "setId") else {
+    guard let setId = request.param(name: "setid") else {
         print("no setId")
         invalidFlashcard(request: request, response)
         return
@@ -59,7 +59,9 @@ func newFlashcards(request: HTTPRequest, _ response: HTTPResponse) {
         invalidFlashcard(request: request, response)
         return
     }
-    print(auth)
+    if verbose {
+        print(auth)
+    }
     guard let requestingUser = lookupUserWith(sessionToken: auth) else {
         print("invalid auth")
         invalidFlashcard(request: request, response)
@@ -126,10 +128,10 @@ func newFlashcards(request: HTTPRequest, _ response: HTTPResponse) {
         }
         let real = checkFlashcards(setId: setId, userId: requestingUser.getUserId())
         if real {
-            print("Editing")
+            print("Editing Flashcards")
             editFlashcards(setId: setId, userId: requestingUser.getUserId(), flashcards: flashcardRing)
         } else {
-            print("Storing")
+            print("Storing Flashcards")
             storeFlashcards(setId: setId, userId: requestingUser.getUserId(), flashcards: flashcardRing)
         }
 

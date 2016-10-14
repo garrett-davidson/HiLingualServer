@@ -284,8 +284,17 @@ func convertRowToFlashcard(row: [String?]) -> Flashcard? {
         return nil
     }
     let newFlashcard = Flashcard()
-    newFlashcard.setFront(newFront: front)
-    newFlashcard.setBack(newBack: back)
+    guard let newFront = front.fromBase64() else {
+        print("Unable to encode message")
+        return nil
+    }
+    guard let newBack = back.fromBase64() else {
+        print("Unable to encode message")
+        return nil
+    }
+
+    newFlashcard.setFront(newFront: newFront)
+    newFlashcard.setBack(newBack: newBack)
     return newFlashcard
 
 
@@ -327,7 +336,9 @@ func convertRowToUserWith(row: [String?]) -> User? {
     }
 
     if let sessionToken = row[6] {
-        print("sessiontoken: " + sessionToken)
+        if verbose {
+            print("sessiontoken: " + sessionToken)
+        }
         newUser.setSessionToken(newSessionToken: sessionToken)
     }
     if let nativeLanguage = row[8] {
@@ -406,12 +417,20 @@ func getMatches(nativeLanguages: String, learningLanguage: String, userBirthdate
 
 func getFlashcards(userId: Int, setId: String) -> [Flashcard] {
     var listOfFlashcards = [Flashcard]()
-    guard dataMysql.query(statement: "SELECT * from hl_flashcards WHERE user_id = \(userId) AND setId = \"\(setId)\"") else {
-        print("none1")
+    guard let encodedSetId = setId.toBase64() else {
+        print("Unable to encode message")
+        return listOfFlashcards
+    }
+    guard dataMysql.query(statement: "SELECT * from hl_flashcards WHERE user_id = \(userId) AND setId = \"\(encodedSetId)\"") else {
+        if verbose{
+            print("none1")
+        }
         return listOfFlashcards
     }
     guard let results = dataMysql.storeResults() else {
-        print("none2")
+        if verbose {
+            print("none2")
+        }
         return listOfFlashcards
     }
     while true {
@@ -480,8 +499,11 @@ func getMessages(withSessionToken token: String, forUser receivingUserId: Int) -
 }
 
 func checkFlashcards(setId: String, userId: Int) -> Bool {
-    guard dataMysql.query(statement: "SELECT * from hl_flashcards WHERE user_id = \(userId) AND setId = \"\(setId)\";" ) else {
-
+    guard let encodedSetId = setId.toBase64() else {
+        print("Unable to encode message")
+        return false
+    }
+    guard dataMysql.query(statement: "SELECT * from hl_flashcards WHERE user_id = \(userId) AND setId = \"\(encodedSetId)\";" ) else {
         return false
     }
     guard let results = dataMysql.storeResults() else {
@@ -493,29 +515,55 @@ func checkFlashcards(setId: String, userId: Int) -> Bool {
 }
 
 func editFlashcards(setId: String, userId: Int, flashcards: [Flashcard]) {
-    guard dataMysql.query(statement: "DELETE FROM hl_flashcards WHERE user_id = \(userId) AND setId = \"\(setId)\";") else {
+    guard let encodedSetId = setId.toBase64() else {
+        print("Unable to encode message")
+        return
+    }
+    guard dataMysql.query(statement: "DELETE FROM hl_flashcards WHERE user_id = \(userId) AND setId = \"\(encodedSetId)\";") else {
         print("Error editing into hl_flashcards")
         return
     }
     for flashcard in flashcards {
-        print(flashcard.getFront())
-        guard dataMysql.query(statement: "INSERT INTO hl_flashcards VALUE (\(userId),\"\(setId)\", \"\(flashcard.getFront())\",\"\(flashcard.getBack())\");") else {
+        guard let encodedFront = flashcard.getFront().toBase64() else {
+            print("Unable to encode message")
+            return
+        }
+        guard let encodedBack = flashcard.getBack().toBase64() else {
+            print("Unable to encode message")
+            return
+        }
+        guard dataMysql.query(statement: "INSERT INTO hl_flashcards VALUE (\(userId),\"\(encodedSetId)\", \"\(encodedFront)\",\"\(encodedBack)\");") else {
             print("Error inserting into hl_flashcards")
             return
         }
-        print("added flashcard to hl_flashcards to table")
+        if verbose {
+            print("added flashcard to hl_flashcards to table")
+        }
     }
 
 }
 
 func storeFlashcards(setId: String, userId: Int, flashcards: [Flashcard]) {
+    guard let encodedSetId = setId.toBase64() else {
+        print("Unable to encode message")
+        return
+    }
     for flashcard in flashcards {
-        print(flashcard.getFront())
-        guard dataMysql.query(statement: "INSERT INTO hl_flashcards VALUE (\(userId),\"\(setId)\", \"\(flashcard.getFront())\",\"\(flashcard.getBack())\");") else {
+        guard let encodedFront = flashcard.getFront().toBase64() else {
+            print("Unable to encode message")
+            return
+        }
+        guard let encodedBack = flashcard.getBack().toBase64() else {
+            print("Unable to encode message")
+            return
+        }
+        guard dataMysql.query(statement: "INSERT INTO hl_flashcards VALUE (\(userId),\"\(encodedSetId)\", \"\(encodedFront)\",\"\(encodedBack)\");") else {
             print("Error inserting into hl_flashcards")
             return
         }
-        print("added flashcard to hl_flashcards to table")
+        if verbose {
+            print("added flashcard to hl_flashcards to table")
+        }
     }
 }
 
