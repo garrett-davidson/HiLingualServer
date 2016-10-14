@@ -256,7 +256,7 @@ func createUserWith(token: String, authorityAccountId: String) -> User? {
         return nil
     }
     if tempUser.getSessionToken() == sessionId {
-        guard dataMysql.query(statement: "UPDATE hl_users SET session_token =\(sessionId) WHERE auth_account_id = \(authAccountId)") else {
+        guard dataMysql.query(statement: "UPDATE hl_users SET session_token =\"\(sessionId)\" WHERE authority_account_id = \"\(authAccountId)\"") else {
             return nil
         }
         return tempUser
