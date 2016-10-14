@@ -63,14 +63,12 @@ func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
             print("invalid json string")
             return
         }
-
-        guard let _ = request.header(HTTPRequestHeader.Name.authorization) else {
-            print("no auth parameter")
-            unauthorizedResponse(response: response)
-            return
+        if verifyAuthToken(request: request, response, result) {
+            editUserInfo(request: request, response, result)
+        } else {
+            errorResponse(response: response)
         }
-
-        editUserInfo(request: request, response, result)
+        
     } catch {
         print("bad request")
         badRequestResponse(response: response)
@@ -124,11 +122,8 @@ func editUserInfo(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
     }
     let user = User(newUserId: userId, newName: name, newDisplayName: displayName, newBio: bio, newGender: gender, newBirthdate: birthdate, nativeLanguage: nativeLanguage, learningLanguage: learningLanguage)
 
-    if verifyAuthToken(request: request, response, requestBodyDic) {
-        overwriteUserData(user: user)
-    } else {
-        errorResponse(response: response)
-    }
+    overwriteUserData(user: user)
+
 }
 
 func getMatchList(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: [String: AnyObject]) {

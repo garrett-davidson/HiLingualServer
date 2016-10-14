@@ -7,7 +7,7 @@ extension String {
         return range(of: "^[a-zA-Z0-9]+$", options: .regularExpression) != nil
     }
 }
-let verbose = false
+let verbose = true
 
 func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
     //parse uri and call relevant funtion
@@ -168,7 +168,9 @@ func logoutWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic
         return
     }
     if verifyAuthToken(request: request, response, requestBodyDic) {
-        logoutUserWith(userId: userIdInt, sessionId: auth)
+        if !logoutUserWith(userId: userIdInt, sessionId: auth) {
+        	badRequestResponse(response: response)
+        }
     }
 }
 
