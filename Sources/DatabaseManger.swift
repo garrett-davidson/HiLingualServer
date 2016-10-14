@@ -298,7 +298,7 @@ func convertRowToUserWith(row: [String?]) -> User? {
     let a = row[0]
     if a != nil {
         let userId = Int(a!)
-        if (userId != nil) {
+        if userId != nil {
             newUser.setUserId(newUserId: userId!)
         }
     }
@@ -329,7 +329,7 @@ func convertRowToUserWith(row: [String?]) -> User? {
     let b = row[5]
     if b != nil {
         let birthdate = Int(b!)
-        if (birthdate != nil) {
+        if birthdate != nil {
             newUser.setBirthdate(newBirthdate: birthdate!)
         }
     }
