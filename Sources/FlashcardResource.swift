@@ -33,7 +33,11 @@ func requestFlashcards(request: HTTPRequest, _ response: HTTPResponse) {
         invalidFlashcard(request: request, response)
         return
     }
-    let flashcardRings = getFlashcards(userId: requestingUser.getUserId(), setId: setId)
+    guard let flashcardRings = getFlashcards(userId: requestingUser.getUserId(), setId: setId) else {
+        print("failed to get Flashcards from database")
+        invalidFlashcard(request: request, response)
+        return
+    }
     if flashcardRings.count < 1 {
         print("no flashcard with that name")
         invalidFlashcard(request: request, response)

@@ -29,7 +29,4 @@ class Flashcard {
         self.back = newBack
     }
 
-
-
-
 }

@@ -450,23 +450,23 @@ func getMatches(nativeLanguages: String, learningLanguage: String, userBirthdate
     return sortedArray
 }
 
-func getFlashcards(userId: Int, setId: String) -> [Flashcard] {
+func getFlashcards(userId: Int, setId: String) -> [Flashcard]? {
     var listOfFlashcards = [Flashcard]()
     guard let encodedSetId = setId.toBase64() else {
         print("Unable to encode message")
-        return listOfFlashcards
+        return nil
     }
     guard dataMysql.query(statement: "SELECT * from hl_flashcards WHERE user_id = \(userId) AND setId = \"\(encodedSetId)\"") else {
         if verbose {
             print("none1")
         }
-        return listOfFlashcards
+        return nil
     }
     guard let results = dataMysql.storeResults() else {
         if verbose {
             print("none2")
         }
-        return listOfFlashcards
+        return nil
     }
     while true {
         guard let row = results.next() else {
