@@ -31,7 +31,8 @@ let createUsersTableQuery = "CREATE TABLE IF NOT EXISTS \(usersTable)(" +
   "session_token LONGTEXT, " +
   "native_language LONGTEXT, " +
   "learning_language LONGTEXT, " +
-  "apns_token LONGTEXT);"
+  "apns_token LONGTEXT, " +
+  "authority_account_id LONGTEXT);"
 
 let createFlashcardTableQuery = "CREATE TABLE IF NOT EXISTS \(flashcardTable)(" +
     "user_id BIGINT, " +
@@ -160,38 +161,73 @@ func overwriteUserData(user: User) {
     print("updated user to table")
 }
 
-func createUserWith(token: String) -> User? {
-    let newUser = User()
-    guard dataMysql.query(statement: "INSERT INTO hl_users (session_token) VALUES(\"\(token)\");") else {
+func createUserWith(token: String, authorityAccountId: String) -> User? {
+    // make sure no user has registered with authority_account_id
+    guard dataMysql.query(statement: "SELECT COUNT(*) from hl_users WHERE authority_account_id = \"\(authorityAccountId)\";") else {
+        print("databse error")
+        return nil
+    }
+    guard let firstResults = dataMysql.storeResults() else {
+        return nil
+    }
+    guard firstResults.numRows() == 1 else {
+        print("no rows found")
+        return nil
+    }
+    guard let row1 = firstResults.next() else {
+        return nil
+    }
+    guard let column1 = row1.first else {
+        return nil
+    }
+    guard let column2 = column1 else {
+        return nil
+    }
+    guard let numpeople = Int(column2) else {
+        return nil
+    }
+    guard numpeople < 1 else {
+        print("user already exists")
+        return nil
+    }
+
+
+
+
+    guard dataMysql.query(statement: "INSERT INTO hl_users (session_token, authority_account_id) VALUES(\"\(token)\", \"\(authorityAccountId)\");") else {
         print("Error inserting into hl_users")
-        return newUser
+        return nil
     }
     guard dataMysql.query(statement: "SELECT MAX(user_id) from hl_users;") else {
         print("Mysql error")
         return nil
     }
     guard let results = dataMysql.storeResults() else {
+        print("no results")
         return nil
     }
     guard results.numRows() == 1 else {
         print("no rows found")
-        return newUser
+        return nil
     }
 
     guard let row = results.next() else {
+        print("no next row")
         return nil
     }
     guard let col1 = row.first else {
+        print("no first col")
         return nil
     }
     guard let col2 = col1 else {
+        print("cant unpack first col")
         return nil
     }
     guard let newUserId = Int(col2) else {
+        print("cant cast col to user id (int)")
         return nil
     }
-    newUser.setUserId(newUserId: newUserId)
-    return newUser
+    return getUser(userId: newUserId)
 }
 
 @discardableResult func logoutUserWith(userId: Int, sessionId: String) -> Bool {
@@ -257,60 +293,63 @@ func convertRowToFlashcard(row: [String?]) -> Flashcard? {
 
 func convertRowToUserWith(row: [String?]) -> User? {
     let newUser = User()
-    guard row.count == 8 else {
-        return nil
-    }
+
     //userid
-    guard let a = row[0], let userId = Int(a) else {
-        return nil
+    let a = row[0]
+    if a != nil {
+        let userId = Int(a!)
+        if (userId != nil) {
+            newUser.setUserId(newUserId: userId!)
+        }
     }
-    newUser.setUserId(newUserId: userId)
-    guard let name = row[1]?.fromBase64() else {
-        return nil
+    let name = row[1]?.fromBase64()
+    if name != nil {
+        newUser.setName(newName: name!)
     }
-    newUser.setName(newName: name)
-    guard let displayName = row[2]?.fromBase64() else {
-        return nil
+    let displayName = row[2]?.fromBase64()
+    if displayName != nil {
+        newUser.setDisplayName(newDisplayName: displayName!)
     }
-    newUser.setDisplayName(newDisplayName: displayName)
-    guard let bio = row[3]?.fromBase64() else {
-        return nil
+    let bio = row[3]?.fromBase64()
+    if bio != nil {
+        newUser.setBio(newBio: bio!)
     }
-    newUser.setBio(newBio: bio)
-    guard let genderString = row[4] else {
-        return nil
+    let genderString = row[4]
+    if genderString != nil {
+        var tempGender: Gender
+        if genderString! == "FEMALE" {
+            tempGender = Gender.FEMALE
+        } else if genderString! == "MALE" {
+            tempGender = Gender.MALE
+        } else {
+            tempGender = Gender.NOTSET
+        }
+        newUser.setGender(newGender: tempGender)
     }
-    var tempGender: Gender
-    if genderString == "FEMALE" {
-        tempGender = Gender.FEMALE
-    } else if genderString == "MALE" {
-        tempGender = Gender.MALE
-    } else {
-        tempGender = Gender.NOTSET
+    let b = row[5]
+    if b != nil {
+        let birthdate = Int(b!)
+        if (birthdate != nil) {
+            newUser.setBirthdate(newBirthdate: birthdate!)
+        }
     }
-    newUser.setGender(newGender: tempGender)
-    guard let b = row[5], let birthdate = Int(b) else {
-        return nil
+    let sessionToken = row[6]
+    if sessionToken != nil {
+        print("sessiontoken: " + sessionToken!)
+        newUser.setSessionToken(newSessionToken: sessionToken!)
     }
-    newUser.setBirthdate(newBirthdate: birthdate)
-    guard let authAccountId = row[6] else {
-        return nil
+    let nativeLanguage = row[8]
+    if nativeLanguage != nil {
+        newUser.setNativeLanguage(newNativeLanguage: nativeLanguage!)
     }
-    newUser.setAuthorityAccountId(newAuthorityAccountId: authAccountId)
-    guard let sessionToken = row[7] else {
-        return nil
+    let learningLanguage = row[9]
+    if learningLanguage != nil {
+        newUser.setLearningLanguage(newLearningLanguage: learningLanguage!)
     }
-    newUser.setSessionToken(newSessionToken: sessionToken)
-
-    guard let learningLanguage = row[8] else {
-        return nil
+    let authAccountId = row[10]
+    if authAccountId != nil {
+        newUser.setAuthorityAccountId(newAuthorityAccountId: authAccountId!)
     }
-    newUser.setLearningLanguage(newLearningLanguage: learningLanguage)
-
-    guard let nativeLanguage = row[9] else {
-        return nil
-    }
-    newUser.setNativeLanguage(newNativeLanguage: nativeLanguage)
 
     return newUser
 }
@@ -398,18 +437,22 @@ func getFlashcards(userId: Int, setId: String) -> [Flashcard] {
 
 func getUser(userId: Int) -> User? {
     guard dataMysql.query(statement: "SELECT * from hl_users WHERE user_id = \(userId)") else {
+        print("databse error select user. getUser()")
         return nil
     }
     guard let results = dataMysql.storeResults() else {
+        print("no results in getUser()")
         return nil
     }
     guard results.numRows() == 1 else {
+        print("More than one user returned getUser()")
         return nil
     }
     guard let row = results.next() else {
         return nil
     }
     guard let tempUser = convertRowToUserWith(row: row) else {
+        print("Error converting row to user getUser()")
         return nil
     }
     if tempUser.getUserId() == userId {

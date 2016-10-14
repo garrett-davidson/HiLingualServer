@@ -200,12 +200,12 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
             if verbose {print("no auth token sent")}
             return
         }
-        guard let authority_account_id = requestBodyDic["authorityAccountId"] as? String else {
+        guard let authorityAccountId = requestBodyDic["authorityAccountId"] as? String else {
             if verbose {print("no auth account id sent")}
             return
         }
 
-        guard let user = createUserWith(token: token, authority_account_id: authority_account_id) else {
+        guard let user = createUserWith(token: token, authorityAccountId: authorityAccountId) else {
             if verbose {print("database error or user exists")}
             return
         }
