@@ -422,7 +422,7 @@ func getFlashcards(userId: Int, setId: String) -> [Flashcard] {
         return listOfFlashcards
     }
     guard dataMysql.query(statement: "SELECT * from hl_flashcards WHERE user_id = \(userId) AND setId = \"\(encodedSetId)\"") else {
-        if verbose{
+        if verbose {
             print("none1")
         }
         return listOfFlashcards
