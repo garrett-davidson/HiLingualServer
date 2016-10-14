@@ -207,6 +207,7 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
 
         guard let user = createUserWith(token: token, authorityAccountId: authorityAccountId) else {
             if verbose {print("database error or user exists")}
+            badRequestResponse(response: response)
             return
         }
         print("userid: " + String(user.getUserId()) + " token: " + user.getSessionToken())
