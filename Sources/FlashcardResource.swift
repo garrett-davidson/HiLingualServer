@@ -23,6 +23,11 @@ func requestFlashcards(request: HTTPRequest, _ response: HTTPResponse) {
     }
     //Check to see auth is good
     //get user id
+    if setId.characters.count > 50 || setId.characters.count < 1 {
+        print("invalid setid")
+        invalidFlashcard(request: request, response)
+        return
+    }
     guard let requestingUser = lookupUserWith(sessionToken: auth) else {
         print("invalid auth")
         invalidFlashcard(request: request, response)
@@ -95,6 +100,12 @@ func newFlashcards(request: HTTPRequest, _ response: HTTPResponse) {
             invalidFlashcard(request: request, response)
             return
         }
+
+        if setId.characters.count > 50 || setId.characters.count < 1 {
+            print("invalid setid")
+            invalidFlashcard(request: request, response)
+            return
+        }
         var flashcardRing = [Flashcard]()
         guard let newFlashcards = result[setId] as? NSArray else {
             print("improper formating")
@@ -117,8 +128,8 @@ func newFlashcards(request: HTTPRequest, _ response: HTTPResponse) {
                 invalidFlashcard(request: request, response)
                 return
             }
-            if front.characters.count > 50 || back.characters.count > 50 {
-                print("to many characters")
+            if front.characters.count > 50 || back.characters.count > 50 || back.characters.count < 1 || front.characters.count < 1 {
+                print("invalid character count")
                 invalidFlashcard(request: request, response)
                 return
             }
@@ -136,7 +147,7 @@ func newFlashcards(request: HTTPRequest, _ response: HTTPResponse) {
         }
 
     } catch {
-        print("bad request")
+        print("Not json")
         invalidFlashcard(request: request, response)
         return
     }
