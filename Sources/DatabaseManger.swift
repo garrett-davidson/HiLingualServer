@@ -232,7 +232,7 @@ func createUserWith(token: String, authorityAccountId: String) -> User? {
 
 @discardableResult func logoutUserWith(userId: Int, sessionId: String) -> Bool {
     print("logging out")
-    guard dataMysql.query(statement: "UPDATE hl_users SET session_token = \"\" WHERE session_token = \(sessionId)") else {
+    guard dataMysql.query(statement: "UPDATE hl_users SET session_token = \"\" WHERE session_token = \"\(sessionId)\";") else {
         return false
     }
     return true
