@@ -284,8 +284,17 @@ func convertRowToFlashcard(row: [String?]) -> Flashcard? {
         return nil
     }
     let newFlashcard = Flashcard()
-    newFlashcard.setFront(newFront: front)
-    newFlashcard.setBack(newBack: back)
+    guard let newFront = front.fromBase64() else {
+        print("Unable to encode message")
+        return nil
+    }
+    guard let newBack = back.fromBase64() else {
+        print("Unable to encode message")
+        return nil
+    }
+
+    newFlashcard.setFront(newFront: newFront)
+    newFlashcard.setBack(newBack: newBack)
     return newFlashcard
 
 
@@ -295,60 +304,53 @@ func convertRowToUserWith(row: [String?]) -> User? {
     let newUser = User()
 
     //userid
-    let a = row[0]
-    if a != nil {
-        let userId = Int(a!)
-        if userId != nil {
-            newUser.setUserId(newUserId: userId!)
+    if let a = row[0] {
+        if let userId = Int(a) {
+            newUser.setUserId(newUserId: userId)
         }
     }
-    let name = row[1]?.fromBase64()
-    if name != nil {
-        newUser.setName(newName: name!)
+
+    if let name = row[1]?.fromBase64() {
+        newUser.setName(newName: name)
     }
-    let displayName = row[2]?.fromBase64()
-    if displayName != nil {
-        newUser.setDisplayName(newDisplayName: displayName!)
+
+    if let displayName = row[2]?.fromBase64() {
+        newUser.setDisplayName(newDisplayName: displayName)
     }
-    let bio = row[3]?.fromBase64()
-    if bio != nil {
-        newUser.setBio(newBio: bio!)
+
+    if let bio = row[3]?.fromBase64() {
+        newUser.setBio(newBio: bio)
     }
-    let genderString = row[4]
-    if genderString != nil {
-        var tempGender: Gender
-        if genderString! == "FEMALE" {
-            tempGender = Gender.FEMALE
-        } else if genderString! == "MALE" {
-            tempGender = Gender.MALE
+
+    if let genderString = row[4] {
+        if let gender = Gender(rawValue: genderString) {
+            newUser.setGender(newGender: gender)
         } else {
-            tempGender = Gender.NOTSET
-        }
-        newUser.setGender(newGender: tempGender)
-    }
-    let b = row[5]
-    if b != nil {
-        let birthdate = Int(b!)
-        if birthdate != nil {
-            newUser.setBirthdate(newBirthdate: birthdate!)
+            newUser.setGender(newGender: Gender.NOTSET)
         }
     }
-    let sessionToken = row[6]
-    if sessionToken != nil {
-        print("sessiontoken: " + sessionToken!)
-        newUser.setSessionToken(newSessionToken: sessionToken!)
+    if let b = row[5] {
+        if let birthdate = Int(b) {
+            newUser.setBirthdate(newBirthdate: birthdate)
+        }
     }
-    let nativeLanguage = row[8]
-    if nativeLanguage != nil {
-        newUser.setNativeLanguage(newNativeLanguage: nativeLanguage!)
+
+    if let sessionToken = row[6] {
+        if verbose {
+            print("sessiontoken: " + sessionToken)
+        }
+        newUser.setSessionToken(newSessionToken: sessionToken)
     }
-    let learningLanguage = row[9]
-    if learningLanguage != nil {
-        newUser.setLearningLanguage(newLearningLanguage: learningLanguage!)
+    if let nativeLanguage = row[8] {
+        newUser.setNativeLanguage(newNativeLanguage: nativeLanguage)
     }
-    let authAccountId = row[10]
-    if authAccountId != nil {
-        newUser.setAuthorityAccountId(newAuthorityAccountId: authAccountId!)
+
+    if let learningLanguage = row[9] {
+        newUser.setLearningLanguage(newLearningLanguage: learningLanguage)
+    }
+
+    if let authAccountId = row[10] {
+        newUser.setAuthorityAccountId(newAuthorityAccountId: authAccountId)
     }
 
     return newUser
@@ -415,12 +417,20 @@ func getMatches(nativeLanguages: String, learningLanguage: String, userBirthdate
 
 func getFlashcards(userId: Int, setId: String) -> [Flashcard] {
     var listOfFlashcards = [Flashcard]()
-    guard dataMysql.query(statement: "SELECT * from hl_flashcards WHERE user_id = \(userId) AND setId = \"\(setId)\"") else {
-        print("none1")
+    guard let encodedSetId = setId.toBase64() else {
+        print("Unable to encode message")
+        return listOfFlashcards
+    }
+    guard dataMysql.query(statement: "SELECT * from hl_flashcards WHERE user_id = \(userId) AND setId = \"\(encodedSetId)\"") else {
+        if verbose {
+            print("none1")
+        }
         return listOfFlashcards
     }
     guard let results = dataMysql.storeResults() else {
-        print("none2")
+        if verbose {
+            print("none2")
+        }
         return listOfFlashcards
     }
     while true {
@@ -489,8 +499,11 @@ func getMessages(withSessionToken token: String, forUser receivingUserId: Int) -
 }
 
 func checkFlashcards(setId: String, userId: Int) -> Bool {
-    guard dataMysql.query(statement: "SELECT * from hl_flashcards WHERE user_id = \(userId) AND setId = \"\(setId)\";" ) else {
-
+    guard let encodedSetId = setId.toBase64() else {
+        print("Unable to encode message")
+        return false
+    }
+    guard dataMysql.query(statement: "SELECT * from hl_flashcards WHERE user_id = \(userId) AND setId = \"\(encodedSetId)\";" ) else {
         return false
     }
     guard let results = dataMysql.storeResults() else {
@@ -502,29 +515,55 @@ func checkFlashcards(setId: String, userId: Int) -> Bool {
 }
 
 func editFlashcards(setId: String, userId: Int, flashcards: [Flashcard]) {
-    guard dataMysql.query(statement: "DELETE FROM hl_flashcards WHERE user_id = \(userId) AND setId = \"\(setId)\";") else {
+    guard let encodedSetId = setId.toBase64() else {
+        print("Unable to encode message")
+        return
+    }
+    guard dataMysql.query(statement: "DELETE FROM hl_flashcards WHERE user_id = \(userId) AND setId = \"\(encodedSetId)\";") else {
         print("Error editing into hl_flashcards")
         return
     }
     for flashcard in flashcards {
-        print(flashcard.getFront())
-        guard dataMysql.query(statement: "INSERT INTO hl_flashcards VALUE (\(userId),\"\(setId)\", \"\(flashcard.getFront())\",\"\(flashcard.getBack())\");") else {
+        guard let encodedFront = flashcard.getFront().toBase64() else {
+            print("Unable to encode message")
+            return
+        }
+        guard let encodedBack = flashcard.getBack().toBase64() else {
+            print("Unable to encode message")
+            return
+        }
+        guard dataMysql.query(statement: "INSERT INTO hl_flashcards VALUE (\(userId),\"\(encodedSetId)\", \"\(encodedFront)\",\"\(encodedBack)\");") else {
             print("Error inserting into hl_flashcards")
             return
         }
-        print("added flashcard to hl_flashcards to table")
+        if verbose {
+            print("added flashcard to hl_flashcards to table")
+        }
     }
 
 }
 
 func storeFlashcards(setId: String, userId: Int, flashcards: [Flashcard]) {
+    guard let encodedSetId = setId.toBase64() else {
+        print("Unable to encode message")
+        return
+    }
     for flashcard in flashcards {
-        print(flashcard.getFront())
-        guard dataMysql.query(statement: "INSERT INTO hl_flashcards VALUE (\(userId),\"\(setId)\", \"\(flashcard.getFront())\",\"\(flashcard.getBack())\");") else {
+        guard let encodedFront = flashcard.getFront().toBase64() else {
+            print("Unable to encode message")
+            return
+        }
+        guard let encodedBack = flashcard.getBack().toBase64() else {
+            print("Unable to encode message")
+            return
+        }
+        guard dataMysql.query(statement: "INSERT INTO hl_flashcards VALUE (\(userId),\"\(encodedSetId)\", \"\(encodedFront)\",\"\(encodedBack)\");") else {
             print("Error inserting into hl_flashcards")
             return
         }
-        print("added flashcard to hl_flashcards to table")
+        if verbose {
+            print("added flashcard to hl_flashcards to table")
+        }
     }
 }
 

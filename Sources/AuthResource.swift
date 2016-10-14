@@ -7,7 +7,7 @@ extension String {
         return range(of: "^[a-zA-Z0-9]+$", options: .regularExpression) != nil
     }
 }
-let verbose = true
+let verbose = false
 
 func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
     //parse uri and call relevant funtion
