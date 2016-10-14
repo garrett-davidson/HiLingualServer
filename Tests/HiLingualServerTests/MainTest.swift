@@ -26,7 +26,7 @@ class MainTests: XCTestCase {
         sendTest(request: request, withExpectedResponse: expectedResponse)
     }
 
-    func testRehister() {
+    func testRegister() {
         var request = URLRequest(url: URL(string: "http://127.0.0.1:8180/auth/register")!)
         let invalidAuthCode = 401
         let invalidRequestCode = 400

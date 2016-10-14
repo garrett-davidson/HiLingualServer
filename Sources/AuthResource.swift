@@ -7,7 +7,7 @@ extension String {
         return range(of: "^[a-zA-Z0-9]+$", options: .regularExpression) != nil
     }
 }
-let verbose = false
+let verbose = true
 
 func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
     //parse uri and call relevant funtion
@@ -200,13 +200,17 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
             if verbose {print("no auth token sent")}
             return
         }
-
-        guard let user = createUserWith(token: token) else {
-            if verbose {print("database error")}
+        guard let authority_account_id = requestBodyDic["authorityAccountId"] as? String else {
+            if verbose {print("no auth account id sent")}
             return
         }
 
-        let dict: [String: Any] = ["userId": user.getUserId(), "sessionId": user.getSessionToken()]
+        guard let user = createUserWith(token: token, authority_account_id: authority_account_id) else {
+            if verbose {print("database error or user exists")}
+            return
+        }
+        print("userid: " + String(user.getUserId()) + " token: " + user.getSessionToken())
+        let dict: [String: Any] = ["userId": user.getUserId(), "sessionToken": user.getSessionToken()]
         do {
             try response.setBody(json: dict)
         } catch {
