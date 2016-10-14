@@ -232,6 +232,34 @@ func createUserWith(token: String, authorityAccountId: String) -> User? {
 
 @discardableResult func logoutUserWith(userId: Int, sessionId: String) -> Bool {
     print("logging out")
+    guard dataMysql.query(statement: "SELECT COUNT(*) from hl_users WHERE session_token = \"\(sessionId)\";") else {
+        print("databse error")
+        return false
+    }
+    guard let firstResults = dataMysql.storeResults() else {
+        return false
+    }
+    guard firstResults.numRows() == 1 else {
+        print("no rows found")
+        return false
+    }
+    guard let row1 = firstResults.next() else {
+        return false
+    }
+    guard let column1 = row1.first else {
+        return false
+    }
+    guard let column2 = column1 else {
+        return false
+    }
+    guard let numpeople = Int(column2) else {
+        return false
+    }
+    guard numpeople == 1 else {
+        print("session doesn't exist")
+        return false
+    }
+
     guard dataMysql.query(statement: "UPDATE hl_users SET session_token = NULL WHERE session_token = \"\(sessionId)\";") else {
         return false
     }
@@ -240,23 +268,30 @@ func createUserWith(token: String, authorityAccountId: String) -> User? {
 
 @discardableResult func loginUserWith(authAccountId: String, sessionId: String) -> User? {
     print("logging in user")
-    guard dataMysql.query(statement: "SELECT * from hl_users WHERE auth_account_id = \(authAccountId)") else {
+    guard dataMysql.query(statement: "SELECT * from hl_users WHERE authority_account_id = \"\(authAccountId)\";") else {
+        print("Error in selecting user for logout")
         return nil
-    }
+    }   
     guard let results = dataMysql.storeResults() else {
+        print("databse error")
         return nil
     }
     guard results.numRows() == 1 else {
+        print("databse error")
         return nil
     }
     guard let row = results.next() else {
+        print("databse error")
         return nil
     }
     guard let tempUser = convertRowToUserWith(row: row) else {
+        print("convert user to row error")
         return nil
     }
-    if tempUser.getSessionToken() == sessionId {
-        guard dataMysql.query(statement: "UPDATE hl_users SET session_token =\(sessionId) WHERE auth_account_id = \(authAccountId)") else {
+    print(tempUser.getAuthorityAccountId())
+    print(authAccountId)
+    if tempUser.getAuthorityAccountId() == authAccountId {
+        guard dataMysql.query(statement: "UPDATE hl_users SET session_token =\"\(sessionId)\" WHERE authority_account_id = \"\(authAccountId)\"") else {
             return nil
         }
         return tempUser
