@@ -428,24 +428,31 @@ func lookupUserWith(sessionToken: String) -> User? {
 
 func getMatches(nativeLanguages: String, learningLanguage: String, userBirthdate: Int) -> [User] {
     var listOfMatches = [User]()
-    guard dataMysql.query(statement: "SELECT * from hl_users WHERE nativeLanguages = \(learningLanguage) AND learningLanguage = \(nativeLanguages)") else {
-        return listOfMatches
-    }
-    guard let results = dataMysql.storeResults() else {
-        return listOfMatches
-    }
-    guard results.numRows() < 1 else {
-        return listOfMatches
-    }
-    while true {
-        guard let row = results.next() else {
-            break
+    let learningArray = learningLanguage.components(separatedBy: ",")
+    let nativeArray = nativeLanguages.components(separatedBy: ",")
+    
+    for learning in learningArray {
+        for native in nativeArray {
+            guard dataMysql.query(statement: "SELECT * from hl_users WHERE nativeLanguages LIKE \"%\(learning)%\" AND learningLanguage LIKE \"%\(native)%\"") else {
+                continue
+            }
+            guard let results = dataMysql.storeResults() else{
+                continue
+            }
+            if results.numRows() >= 1{
+                while true {
+                    guard let row = results.next() else {
+                        break
+                    }
+                    guard let tempUser = convertRowToUserWith(row: row) else {
+                        break
+                    }
+                    listOfMatches.append(tempUser)
+                }
+            }
         }
-        guard let tempUser = convertRowToUserWith(row: row) else {
-            break
-        }
-        listOfMatches.append(tempUser)
     }
+
     let sortedArray = listOfMatches.sorted {abs($0.getBirthdate() - userBirthdate) < abs($1.getBirthdate() - userBirthdate)}
     return sortedArray
 }
