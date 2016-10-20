@@ -23,6 +23,15 @@ func handleChat(request: HTTPRequest, _ response: HTTPResponse) {
     response.completed()
 }
 
+func handleChatGet(request: HTTPRequest, _ response: HTTPResponse) {
+    //parse uri and call relevant funtion
+    response.setHeader(.contentType, value: "text/html")
+    response.setBody(string: "<html><title>chat</title><body>Chat resource Message</body></html>")
+    print("Appending body")
+    getMessageWith(request: request, response)
+    response.completed()
+}
+
 func handlePicture(request: HTTPRequest, _ response: HTTPResponse) {
     //parse uri and call relevant funtion
     response.setHeader(.contentType, value: "text/html")
@@ -37,6 +46,71 @@ func handleAudio(request: HTTPRequest, _ response: HTTPResponse) {
     response.setBody(string: "<html><title>Audio</title><body>Chat resource Audio</body></html>")
     sendAudioMessageWith(request: request, response)
     response.completed()
+}
+
+func getMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
+    guard let auth = request.param(name: "auth") else {
+        print("no auth token")
+        invalidAuth(request: request, response)
+        return
+    }
+    
+    guard let recipientString = request.param(name: "recipient") else {
+        print("no recipient")
+        invalidMessage(request: request, response)
+        return
+    }
+    
+    guard let recipient = Int(recipientString) else {
+        invalidMessage(request: request, response)
+        print("invalid recipient ID")
+        return
+    }
+
+    guard isValid(userId: recipient) else {
+        invalidMessage(request: request, response)
+        print("Invalid recipient ID")
+        return
+    }
+    
+    guard let sender = lookupUserWith(sessionToken: auth) else {
+        print("Invalid auth")
+        invalidAuth(request: request, response)
+        return
+    }
+    
+    if recipient == sender.getUserId() {
+        print("Can't receive messages from your self")
+        invalidMessage(request: request, response)
+        return
+    }
+    
+    guard let messages = getMessages(withSessionToken: auth, forUser: recipient) else {
+        print("failed to get messages from database")
+        invalidMessage(request: request, response)
+        return
+    }
+    
+    if messages.count < 1 {
+        print("no messages with that id")
+        invalidMessage(request: request, response)
+        return
+    }
+    
+    response.setBody(string: "{ \"Messages\":[")
+    for message in messages {
+        response.appendBody(string: "{ \"messageId\":\"\(message.messageId)\",")
+        response.appendBody(string: " \"sentTimestamp\":\"\(message.sentTimestamp)\",")
+        response.appendBody(string: " \"sender\":\"\(message.sender)\",")
+        response.appendBody(string: " \"receiver\":\"\(message.receiver)\",")
+        response.appendBody(string: " \"body\":\"\(message.body)\"}")
+        if message.messageId != messages[messages.count - 1].messageId {
+            response.appendBody(string: ",")
+        }
+        
+    }
+    response.appendBody(string: "]}")
+    
 }
 
 func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
@@ -86,7 +160,7 @@ func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     }
 
     if recipient == sender.getUserId() {
-        print("Can't send toself")
+        print("Can't send to self")
         invalidMessage(request: request, response)
         return
     }
@@ -163,7 +237,7 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     }
 
     if recipient == sender.getUserId() {
-        print("Can't send toself")
+        print("Can't send to self")
         invalidMessage(request: request, response)
         return
     }
@@ -249,7 +323,7 @@ func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     }
 
     if recipient == sender.getUserId() {
-        print("Can't send toself")
+        print("Can't send to self")
         invalidMessage(request: request, response)
         return
     }
