@@ -1,20 +1,16 @@
 import PerfectLib
 import PerfectHTTP
 
-func handleUser(request: HTTPRequest, _ response: HTTPResponse) {
-    //parse uri and call relevant funtion
-    //response.setHeader(.contentType, value: "text/html")
-    print("start")
+func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
 
-    defer {
+
+      defer {
         response.completed()
     }
 
     guard var urlString = request.urlVariables[routeTrailingWildcardKey] else {
         return
     }
-
-    // swiftlint:disable opening_brace
     var urlStringArray = urlString.characters.split{$0 == "/"}.map(String.init)
 
     guard request.postBodyString != nil else {
@@ -31,8 +27,8 @@ func handleUser(request: HTTPRequest, _ response: HTTPResponse) {
             print("invalid json string")
             return
         }
-        //validate badRequestResponse
-        guard let _ = request.header(HTTPRequestHeader.Name.authorization) else {
+
+         guard let _ = request.header(HTTPRequestHeader.Name.authorization) else {
             print("no auth parameter")
             unauthorizedResponse(response: response)
             return
@@ -40,33 +36,12 @@ func handleUser(request: HTTPRequest, _ response: HTTPResponse) {
 
         if urlStringArray[0] == "match" {
             getMatchList(request: request, response, result)
-        }
-
-    } catch {
-        print("bad request")
-        badRequestResponse(response: response)
-    }
-}
-
-func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
-    guard request.postBodyString != nil else {
-        return
-    }
-
-    guard let jsonString = request.postBodyString else {
-        print("Empty body")
-        return
-    }
-
-    do {
-        guard let result = try jsonString.jsonDecode() as? [String: AnyObject] else {
-            print("invalid json string")
-            return
-        }
-        if verifyAuthToken(request: request, response, result) {
-            editUserInfo(request: request, response, result)
-        } else {
-            errorResponse(response: response)
+        }else{
+            if verifyAuthToken(request: request, response, result) {
+                editUserInfo(request: request, response, result)
+            } else {
+                errorResponse(response: response)
+            }
         }
         
     } catch {
