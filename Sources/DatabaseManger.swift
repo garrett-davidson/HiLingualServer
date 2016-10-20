@@ -17,10 +17,10 @@ let createMessagesTableQuery = "CREATE TABLE IF NOT EXISTS \(messagesTable)(" +
   "edit_timestamp DATETIME, " +
   "sender_id BIGINT, " +
   "receiver_id BIGINT, " +
-  "message VARCHAR(500), " +
-  "edited_message VARCHAR(500), " +
-  "picture VARCHAR(500), " +
-  "audio VARCHAR(500));"
+  "message TEXT, " +
+  "edited_message TEXT, " +
+  "picture TEXT, " +
+  "audio TEXT);"
 let createUsersTableQuery = "CREATE TABLE IF NOT EXISTS \(usersTable)(" +
   "user_id BIGINT UNIQUE PRIMARY KEY AUTO_INCREMENT, " +
   "name TINYTEXT, " +
