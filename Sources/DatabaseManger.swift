@@ -271,7 +271,7 @@ func createUserWith(token: String, authorityAccountId: String) -> User? {
     guard dataMysql.query(statement: "SELECT * from hl_users WHERE authority_account_id = \"\(authAccountId)\";") else {
         print("Error in selecting user for logout")
         return nil
-    }   
+    }
     guard let results = dataMysql.storeResults() else {
         print("databse error")
         return nil
@@ -430,16 +430,16 @@ func getMatches(nativeLanguages: String, learningLanguage: String, userBirthdate
     var listOfMatches = [User]()
     let learningArray = learningLanguage.components(separatedBy: ",")
     let nativeArray = nativeLanguages.components(separatedBy: ",")
-    
+
     for learning in learningArray {
         for native in nativeArray {
             guard dataMysql.query(statement: "SELECT * from hl_users WHERE nativeLanguages LIKE \"%\(learning)%\" AND learningLanguage LIKE \"%\(native)%\"") else {
                 continue
             }
-            guard let results = dataMysql.storeResults() else{
+            guard let results = dataMysql.storeResults() else {
                 continue
             }
-            if results.numRows() >= 1{
+            if results.numRows() >= 1 {
                 while true {
                     guard let row = results.next() else {
                         break

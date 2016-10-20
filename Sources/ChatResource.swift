@@ -42,7 +42,7 @@ func handleAudio(request: HTTPRequest, _ response: HTTPResponse) {
 func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     guard let auth = request.param(name: "auth") else {
         print("no auth token")
-        invalidMessage(request: request, response)
+        invalidAuth(request: request, response)
         return
     }
 
@@ -85,6 +85,12 @@ func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         return
     }
 
+    if recipient == sender.getUserId() {
+        print("Can't send toself")
+        invalidMessage(request: request, response)
+        return
+    }
+
     addMessageToTable(sender: sender.getUserId(), recipient: recipient, message: message)
     let notification = NSNotification(name: NSNotification.Name(rawValue: "Received message"), object: nil, userInfo: ["Sender": sender, "Recipient": recipient, "Message": message])
     send(notification: notification, toUser: recipient)
@@ -93,7 +99,7 @@ func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
 func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     guard let auth = request.param(name: "auth") else {
         print("no auth token")
-        invalidMessage(request: request, response)
+        invalidAuth(request: request, response)
         return
     }
 
@@ -150,10 +156,15 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         return
     }
 
-
     guard let sender = lookupUserWith(sessionToken: auth) else {
         print("Invalid auth")
         invalidAuth(request: request, response)
+        return
+    }
+
+    if recipient == sender.getUserId() {
+        print("Can't send toself")
+        invalidMessage(request: request, response)
         return
     }
 
@@ -171,7 +182,7 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
 func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     guard let auth = request.param(name: "auth") else {
         print("no auth token")
-        invalidMessage(request: request, response)
+        invalidAuth(request: request, response)
         return
     }
 
@@ -234,6 +245,12 @@ func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     guard let sender = lookupUserWith(sessionToken: auth) else {
         print("Invalid auth")
         invalidAuth(request: request, response)
+        return
+    }
+
+    if recipient == sender.getUserId() {
+        print("Can't send toself")
+        invalidMessage(request: request, response)
         return
     }
 
@@ -315,7 +332,7 @@ func invalidMessage(request: HTTPRequest, _ response: HTTPResponse) {
 @discardableResult func send(notification: NSNotification, toUser userId: Int) -> Bool {
     guard let token = apnsToken(forUser: userId) else {
         if verbose {
-            print("Unable to retrieve token")
+            print("Unable to retrieve apns token")
         }
         return false
     }

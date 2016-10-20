@@ -11,7 +11,7 @@ func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
     guard var urlString = request.urlVariables[routeTrailingWildcardKey] else {
         return
     }
-    var urlStringArray = urlString.characters.split{$0 == "/"}.map(String.init)
+    var urlStringArray = urlString.characters.split {$0 == "/"}.map(String.init)
 
     guard request.postBodyString != nil else {
         return
@@ -40,9 +40,9 @@ func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
             badRequestResponse(response: response)
             return
         }
-        
+
     } catch {
-        print("bad request")
+        print("Could not parse JSON request")
         badRequestResponse(response: response)
         return
     }
