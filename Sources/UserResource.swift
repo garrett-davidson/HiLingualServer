@@ -116,7 +116,7 @@ func getMatchList(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
         let age = curUser.getBirthdate()
         let nativeLanguages = curUser.getNativeLanguage()
         let learningLanguage = curUser.getLearningLanguage()
-        let arrayOfMatches = getMatches(nativeLanguages: nativeLanguages, learningLanguage:learningLanguage, userBirthdate: age)
+        let arrayOfMatches = getMatches(nativeLanguages: nativeLanguages, learningLanguage:learningLanguage, userBirthdate: age).unique
         do {
             let encodedJSON = try Array(arrayOfMatches.prefix(20)).jsonEncodedString()
             response.setBody(string: encodedJSON)
@@ -126,5 +126,18 @@ func getMatchList(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
         }
     } else {
         errorResponse(response: response)
+    }
+}
+
+
+extension Array where Element : Equatable {
+    var unique: [Element] {
+        var uniqueValues: [Element] = []
+        forEach { item in
+            if !uniqueValues.contains(item) {
+                uniqueValues += [item]
+            }
+        }
+        return uniqueValues
     }
 }
