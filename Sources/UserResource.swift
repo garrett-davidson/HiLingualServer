@@ -31,9 +31,11 @@ func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
             getMatchList(request: request, response, result)
         } else if urlStringArray[0] == "update" {
             if verifyAuthToken(request: request, response, result) {
+                print("worked")
                 editUserInfo(request: request, response, result)
             } else {
-                errorResponse(response: response)
+                print("got wrecked")
+                unauthorizedResponse(response: response)
             }
         } else {
             print("bad request")
