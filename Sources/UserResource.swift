@@ -68,7 +68,7 @@ func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
         } else {
             errorResponse(response: response)
         }
-        
+
     } catch {
         print("bad request")
         badRequestResponse(response: response)

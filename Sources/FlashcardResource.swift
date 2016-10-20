@@ -165,4 +165,3 @@ func invalidUser(request: HTTPRequest, _ response: HTTPResponse) {
     response.setHeader(.contentType, value: "text/html")
     response.setBody(string: "<html><title>Flashcard</title><body>Invalid Authentication!</body></html>")
 }
-
