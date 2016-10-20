@@ -142,19 +142,27 @@ func addPictureMessageToTable(sender: Int, recipient: Int, picture: String) {
 }
 
 func overwriteUserData(user: User) {
-    guard let name = user.getName().toBase64() else {
-        return
+    var name: String
+    var displayName: String
+    var bio: String
+    if let n  = user.getName().toBase64() {
+        name = "\"\(n)\""
+    } else {
+        name = "NULL"
     }
-
-    guard let displayName = user.getDisplayName().toBase64() else {
-        return
+    if let d = user.getDisplayName().toBase64() {
+        displayName = "\"\(d)\""
+    } else {
+        displayName = "NULL"
     }
-
-    guard let bio = user.getBio().toBase64() else {
-        return
+    if let b = user.getBio().toBase64() {
+        bio = "\"\(b)\""
+    } else {
+        bio = "NULL"
     }
-
-    guard dataMysql.query(statement: "UPDATE hl_users VALUE (\(user.getUserId()),\(name),\(displayName),\(bio),\(user.getGender()),\(user.getBirthdate()),NULL,NULL);") else {
+    let query = "UPDATE hl_users SET name = \(name), displayName = \(displayName), bio = \(bio), gender = \"\(user.getGender())\",  native_language = \"\(user.getNativeLanguage())\", learning_language = \"\(user.getLearningLanguage)\" WHERE user_id = \(user.getUserId());"
+    print(query)
+    guard dataMysql.query(statement: query) else {
         print("Error updating user")
         return
     }
