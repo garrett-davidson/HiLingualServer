@@ -28,11 +28,6 @@ func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
             return
         }
 
-         guard let _ = request.header(HTTPRequestHeader.Name.authorization) else {
-            print("no auth parameter")
-            unauthorizedResponse(response: response)
-            return
-        }
 
         if urlStringArray[0] == "match" {
             getMatchList(request: request, response, result)
