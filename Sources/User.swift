@@ -1,4 +1,4 @@
-class User {
+class User: Equatable {
     private var userId: Int
     private var name: String
     private var displayName: String
@@ -121,4 +121,7 @@ class User {
         self.learningLanguage = newLearningLanguage
     }
 
+    static func ==(lhs: User, rhs: User) -> Bool {
+        return lhs.getUserId() == rhs.getUserId()
+    }
 }
