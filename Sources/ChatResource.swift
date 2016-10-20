@@ -42,7 +42,7 @@ func handleAudio(request: HTTPRequest, _ response: HTTPResponse) {
 func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     guard let auth = request.param(name: "auth") else {
         print("no auth token")
-        invalidMessage(request: request, response)
+        invalidAuth(request: request, response)
         return
     }
 
@@ -93,7 +93,7 @@ func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
 func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     guard let auth = request.param(name: "auth") else {
         print("no auth token")
-        invalidMessage(request: request, response)
+        invalidAuth(request: request, response)
         return
     }
 
@@ -171,7 +171,7 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
 func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     guard let auth = request.param(name: "auth") else {
         print("no auth token")
-        invalidMessage(request: request, response)
+        invalidAuth(request: request, response)
         return
     }
 

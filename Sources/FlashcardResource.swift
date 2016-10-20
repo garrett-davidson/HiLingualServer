@@ -13,7 +13,7 @@ func handleFlashcard(request: HTTPRequest, _ response: HTTPResponse) {
 func requestFlashcards(request: HTTPRequest, _ response: HTTPResponse) {
     guard let auth = request.param(name: "auth") else {
         print("no auth token")
-        invalidFlashcard(request: request, response)
+        invalidUser(request: request, response)
         return
     }
     guard let setId = request.param(name: "setid") else {
@@ -30,7 +30,7 @@ func requestFlashcards(request: HTTPRequest, _ response: HTTPResponse) {
     }
     guard let requestingUser = lookupUserWith(sessionToken: auth) else {
         print("invalid auth")
-        invalidFlashcard(request: request, response)
+        invalidUser(request: request, response)
         return
     }
     guard let flashcardRings = getFlashcards(userId: requestingUser.getUserId(), setId: setId) else {
@@ -65,7 +65,7 @@ func handleFlashcardUpdate(request: HTTPRequest, _ response: HTTPResponse) {
 func newFlashcards(request: HTTPRequest, _ response: HTTPResponse) {
     guard let auth = request.param(name: "auth") else {
         print("no auth token")
-        invalidFlashcard(request: request, response)
+        invalidUser(request: request, response)
         return
     }
     if verbose {
@@ -73,7 +73,7 @@ func newFlashcards(request: HTTPRequest, _ response: HTTPResponse) {
     }
     guard let requestingUser = lookupUserWith(sessionToken: auth) else {
         print("invalid auth")
-        invalidFlashcard(request: request, response)
+        invalidUser(request: request, response)
         return
     }
 
@@ -161,3 +161,8 @@ func invalidFlashcard(request: HTTPRequest, _ response: HTTPResponse) {
     response.setHeader(.contentType, value: "text/html")
     response.setBody(string: "<html><title>Flashcard</title><body>Invalid flashcard!</body></html>")
 }
+func invalidUser(request: HTTPRequest, _ response: HTTPResponse) {
+    response.setHeader(.contentType, value: "text/html")
+    response.setBody(string: "<html><title>Flashcard</title><body>Invalid Authentication!</body></html>")
+}
+
