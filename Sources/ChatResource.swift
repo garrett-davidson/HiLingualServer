@@ -54,13 +54,13 @@ func getMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         invalidAuth(request: request, response)
         return
     }
-    
+
     guard let recipientString = request.param(name: "recipient") else {
         print("no recipient")
         invalidMessage(request: request, response)
         return
     }
-    
+
     guard let recipient = Int(recipientString) else {
         invalidMessage(request: request, response)
         print("invalid recipient ID")
@@ -72,31 +72,31 @@ func getMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         print("Invalid recipient ID")
         return
     }
-    
+
     guard let sender = lookupUserWith(sessionToken: auth) else {
         print("Invalid auth")
         invalidAuth(request: request, response)
         return
     }
-    
+
     if recipient == sender.getUserId() {
         print("Can't receive messages from your self")
         invalidMessage(request: request, response)
         return
     }
-    
+
     guard let messages = getMessages(withSessionToken: auth, forUser: recipient) else {
         print("failed to get messages from database")
         invalidMessage(request: request, response)
         return
     }
-    
+
     if messages.count < 1 {
         print("no messages with that id")
         invalidMessage(request: request, response)
         return
     }
-    
+
     response.setBody(string: "{ \"Messages\":[")
     for message in messages {
         response.appendBody(string: "{ \"messageId\":\"\(message.messageId)\",")
@@ -107,10 +107,10 @@ func getMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         if message.messageId != messages[messages.count - 1].messageId {
             response.appendBody(string: ",")
         }
-        
+
     }
     response.appendBody(string: "]}")
-    
+
 }
 
 func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
