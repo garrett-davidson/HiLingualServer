@@ -101,18 +101,18 @@ func editUserInfo(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
 
 func getMatchList(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: [String: AnyObject]) {
     print("Getting User matches")
-    guard let userId = requestBodyDic["userId"] as? Int else {
-        print("bad request")
+    guard let authToken = requestBodyDic["authorityToken"] as? String else {
+        print("bad auth token")
+        badRequestResponse(response: response)
+        return
+    }
+    guard let curUser = lookupUserWith(sessionToken: authToken) else {
+        print("failed to lookup user")
         badRequestResponse(response: response)
         return
     }
 
     if verifyAuthToken(request: request, response, requestBodyDic) {
-        guard let curUser = getUser(userId: userId) else {
-            print("no such user")
-            badRequestResponse(response: response)
-            return
-        }
         let age = curUser.getBirthdate()
         let nativeLanguages = curUser.getNativeLanguage()
         let learningLanguage = curUser.getLearningLanguage()
