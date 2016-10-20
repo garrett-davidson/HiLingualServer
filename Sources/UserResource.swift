@@ -1,21 +1,17 @@
 import PerfectLib
 import PerfectHTTP
 
-func handleUser(request: HTTPRequest, _ response: HTTPResponse) {
-    //parse uri and call relevant funtion
-    //response.setHeader(.contentType, value: "text/html")
-    print("start")
+func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
 
-    defer {
+
+      defer {
         response.completed()
     }
 
     guard var urlString = request.urlVariables[routeTrailingWildcardKey] else {
         return
     }
-
-    // swiftlint:disable opening_brace
-    var urlStringArray = urlString.characters.split{$0 == "/"}.map(String.init)
+    var urlStringArray = urlString.characters.split {$0 == "/"}.map(String.init)
 
     guard request.postBodyString != nil else {
         return
@@ -31,46 +27,23 @@ func handleUser(request: HTTPRequest, _ response: HTTPResponse) {
             print("invalid json string")
             return
         }
-        //validate badRequestResponse
-        guard let _ = request.header(HTTPRequestHeader.Name.authorization) else {
-            print("no auth parameter")
-            unauthorizedResponse(response: response)
-            return
+
+        if (verbose) {
+            print("Read JSON string")
         }
 
         if urlStringArray[0] == "match" {
             getMatchList(request: request, response, result)
-        }
-
-    } catch {
-        print("bad request")
-        badRequestResponse(response: response)
-    }
-}
-
-func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
-    guard request.postBodyString != nil else {
-        return
-    }
-
-    guard let jsonString = request.postBodyString else {
-        print("Empty body")
-        return
-    }
-
-    do {
-        guard let result = try jsonString.jsonDecode() as? [String: AnyObject] else {
-            print("invalid json string")
-            return
-        }
-        if verifyAuthToken(request: request, response, result) {
-            editUserInfo(request: request, response, result)
         } else {
-            errorResponse(response: response)
+            if verifyAuthToken(request: request, response, result) {
+                editUserInfo(request: request, response, result)
+            } else {
+                errorResponse(response: response)
+            }
         }
 
     } catch {
-        print("bad request")
+        print("Could not parse JSON request")
         badRequestResponse(response: response)
         return
     }
@@ -128,25 +101,24 @@ func editUserInfo(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
 
 func getMatchList(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: [String: AnyObject]) {
     print("Getting User matches")
-    guard let userId = requestBodyDic["userId"] as? Int else {
-        print("bad request")
+    guard let authToken = requestBodyDic["authorityToken"] as? String else {
+        print("bad auth token")
+        badRequestResponse(response: response)
+        return
+    }
+    guard let curUser = lookupUserWith(sessionToken: authToken) else {
+        print("failed to lookup user")
         badRequestResponse(response: response)
         return
     }
 
     if verifyAuthToken(request: request, response, requestBodyDic) {
-        guard let curUser = getUser(userId: userId) else {
-            print("no such user")
-            badRequestResponse(response: response)
-            return
-        }
         let age = curUser.getBirthdate()
         let nativeLanguages = curUser.getNativeLanguage()
         let learningLanguage = curUser.getLearningLanguage()
         let arrayOfMatches = getMatches(nativeLanguages: nativeLanguages, learningLanguage:learningLanguage, userBirthdate: age)
-
         do {
-            let encodedJSON = try arrayOfMatches.jsonEncodedString()
+            let encodedJSON = try Array(arrayOfMatches.prefix(20)).jsonEncodedString()
             response.setBody(string: encodedJSON)
         } catch {
             if verbose {print(error)}
