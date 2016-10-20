@@ -27,16 +27,18 @@ func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
             print("invalid json string")
             return
         }
-
-
         if urlStringArray[0] == "match" {
             getMatchList(request: request, response, result)
-        }else{
+        }else if urlStringArray[0] == "update" {
             if verifyAuthToken(request: request, response, result) {
                 editUserInfo(request: request, response, result)
             } else {
                 errorResponse(response: response)
             }
+        }else{
+            print("bad request")
+            badRequestResponse(response: response)
+            return
         }
         
     } catch {
