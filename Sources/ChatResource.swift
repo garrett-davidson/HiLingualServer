@@ -85,6 +85,12 @@ func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         return
     }
 
+    if recipient == sender.getUserId() {
+        print("Can't send toself")
+        invalidMessage(request: request, response)
+        return
+    }
+
     addMessageToTable(sender: sender.getUserId(), recipient: recipient, message: message)
     let notification = NSNotification(name: NSNotification.Name(rawValue: "Received message"), object: nil, userInfo: ["Sender": sender, "Recipient": recipient, "Message": message])
     send(notification: notification, toUser: recipient)
@@ -150,10 +156,15 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         return
     }
 
-
     guard let sender = lookupUserWith(sessionToken: auth) else {
         print("Invalid auth")
         invalidAuth(request: request, response)
+        return
+    }
+
+    if recipient == sender.getUserId() {
+        print("Can't send toself")
+        invalidMessage(request: request, response)
         return
     }
 
@@ -234,6 +245,12 @@ func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     guard let sender = lookupUserWith(sessionToken: auth) else {
         print("Invalid auth")
         invalidAuth(request: request, response)
+        return
+    }
+
+    if recipient == sender.getUserId() {
+        print("Can't send toself")
+        invalidMessage(request: request, response)
         return
     }
 
