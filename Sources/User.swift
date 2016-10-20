@@ -121,7 +121,7 @@ class User: Equatable {
         self.learningLanguage = newLearningLanguage
     }
 
-    static func ==(lhs: User, rhs: User) -> Bool {
+    static func == (lhs: User, rhs: User) -> Bool {
         return lhs.getUserId() == rhs.getUserId()
     }
 }
