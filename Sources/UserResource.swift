@@ -74,8 +74,16 @@ func editUserInfo(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
     if let bio = requestBodyDic["bio"] as? String {
         curUser.setBio(newBio:bio)
     }
-    if let gender = requestBodyDic["gender"] as? Gender {
-        curUser.setGender(newGender:gender)
+    if let gender = requestBodyDic["gender"] as? String {
+        var inGender: Gender
+        if gender == "MALE" {
+            inGender = Gender.MALE
+        } else if gender == "FEMALE" {
+            inGender = Gender.FEMALE
+        } else {
+            inGender = Gender.NOTSET
+        }
+        curUser.setGender(newGender:inGender)
     }
     if let birthdate = requestBodyDic["birthdate"] as? Int {
         curUser.setBirthdate(newBirthdate:birthdate)
