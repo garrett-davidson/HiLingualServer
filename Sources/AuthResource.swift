@@ -151,7 +151,7 @@ func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic:
         return
     }
     if verifyAuthToken(request: request, response, requestBodyDic) {
-        guard loginUserWith(authAccountId: authorityAccountId, sessionId: authorityToken) else{
+        guard loginUserWith(authAccountId: authorityAccountId, sessionId: authorityToken) == nil else{
             badRequestResponse(response: response)
             return
         }
