@@ -27,19 +27,18 @@ func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
             print("invalid json string")
             return
         }
-
-        if (verbose) {
-            print("Read JSON string")
-        }
-
         if urlStringArray[0] == "match" {
             getMatchList(request: request, response, result)
-        } else {
+        }else if urlStringArray[0] == "update" {
             if verifyAuthToken(request: request, response, result) {
                 editUserInfo(request: request, response, result)
             } else {
                 errorResponse(response: response)
             }
+        }else{
+            print("bad request")
+            badRequestResponse(response: response)
+            return
         }
 
     } catch {
@@ -52,50 +51,40 @@ func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
 
 func editUserInfo(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: [String: AnyObject]) {
     print("Editing User")
-    guard let userId = requestBodyDic["userId"] as? Int else {
-        print("bad request")
+    guard let authToken = requestBodyDic["authorityToken"] as? String else {
+        print("bad auth token")
         badRequestResponse(response: response)
         return
     }
-    guard let name = requestBodyDic["name"] as? String else {
-        print("bad request")
-        badRequestResponse(response: response)
-        return
-    }
-    guard let displayName = requestBodyDic["displayName"] as? String else {
-        print("bad request")
-        badRequestResponse(response: response)
-        return
-    }
-    guard let bio = requestBodyDic["bio"] as? String else {
-        print("bad request")
-        badRequestResponse(response: response)
-        return
-    }
-    guard let gender = requestBodyDic["gender"] as? Gender else {
-        print("bad request")
-        badRequestResponse(response: response)
-        return
-    }
-    guard let birthdate = requestBodyDic["birthdate"] as? Int else {
-        print("bad request")
+    guard let curUser = lookupUserWith(sessionToken: authToken) else {
+        print("failed to lookup user")
         badRequestResponse(response: response)
         return
     }
 
-    guard let nativeLanguage = requestBodyDic["nativeLanguages"] as? String else {
-        print("bad request")
-        badRequestResponse(response: response)
-        return
-    }
-    guard let learningLanguage = requestBodyDic["learningLanguages"] as? String else {
-        print("bad request")
-        badRequestResponse(response: response)
-        return
-    }
-    let user = User(newUserId: userId, newName: name, newDisplayName: displayName, newBio: bio, newGender: gender, newBirthdate: birthdate, nativeLanguage: nativeLanguage, learningLanguage: learningLanguage)
 
-    overwriteUserData(user: user)
+    if let name = requestBodyDic["name"] as? String {
+        curUser.setName(newName: name)
+    }
+    if let displayName = requestBodyDic["displayName"] as? String {
+       curUser.setDisplayName(newDisplayName:displayName)
+    }
+    if let bio = requestBodyDic["bio"] as? String {
+        curUser.setBio(newBio:bio)
+    }
+    if let gender = requestBodyDic["gender"] as? Gender {
+        curUser.setGender(newGender:gender)
+    }
+    if let birthdate = requestBodyDic["birthdate"] as? Int {
+        curUser.setBirthdate(newBirthdate:birthdate)
+    }
+    if let nativeLanguage = requestBodyDic["nativeLanguages"] as? String {
+        curUser.setNativeLanguage(newNativeLanguage:nativeLanguage)
+    }
+    if let learningLanguage = requestBodyDic["learningLanguages"] as? String {
+       curUser.setLearningLanguage(newLearningLanguage:learningLanguage)
+    }
+    overwriteUserData(user: curUser)
 
 }
 
@@ -116,7 +105,7 @@ func getMatchList(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
         let age = curUser.getBirthdate()
         let nativeLanguages = curUser.getNativeLanguage()
         let learningLanguage = curUser.getLearningLanguage()
-        let arrayOfMatches = getMatches(nativeLanguages: nativeLanguages, learningLanguage:learningLanguage, userBirthdate: age)
+        let arrayOfMatches = getMatches(nativeLanguages: nativeLanguages, learningLanguage:learningLanguage, userBirthdate: age).unique
         do {
             let encodedJSON = try Array(arrayOfMatches.prefix(20)).jsonEncodedString()
             response.setBody(string: encodedJSON)
@@ -126,5 +115,18 @@ func getMatchList(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
         }
     } else {
         errorResponse(response: response)
+    }
+}
+
+
+extension Array where Element : Equatable {
+    var unique: [Element] {
+        var uniqueValues: [Element] = []
+        forEach { item in
+            if !uniqueValues.contains(item) {
+                uniqueValues += [item]
+            }
+        }
+        return uniqueValues
     }
 }
