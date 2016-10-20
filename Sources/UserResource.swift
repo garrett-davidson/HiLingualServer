@@ -11,7 +11,7 @@ func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
     guard var urlString = request.urlVariables[routeTrailingWildcardKey] else {
         return
     }
-    var urlStringArray = urlString.characters.split{$0 == "/"}.map(String.init)
+    var urlStringArray = urlString.characters.split {$0 == "/"}.map(String.init)
 
     guard request.postBodyString != nil else {
         return
@@ -28,19 +28,22 @@ func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
             return
         }
 
+        if (verbose) {
+            print("Read JSON string")
+        }
 
         if urlStringArray[0] == "match" {
             getMatchList(request: request, response, result)
-        }else{
+        } else {
             if verifyAuthToken(request: request, response, result) {
                 editUserInfo(request: request, response, result)
             } else {
                 errorResponse(response: response)
             }
         }
-        
+
     } catch {
-        print("bad request")
+        print("Could not parse JSON request")
         badRequestResponse(response: response)
         return
     }

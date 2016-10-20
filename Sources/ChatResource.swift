@@ -315,7 +315,7 @@ func invalidMessage(request: HTTPRequest, _ response: HTTPResponse) {
 @discardableResult func send(notification: NSNotification, toUser userId: Int) -> Bool {
     guard let token = apnsToken(forUser: userId) else {
         if verbose {
-            print("Unable to retrieve token")
+            print("Unable to retrieve apns token")
         }
         return false
     }
