@@ -441,7 +441,8 @@ func getMatches(nativeLanguages: String, learningLanguage: String, userBirthdate
 
     for learning in learningArray {
         for native in nativeArray {
-            print(learning + " " + native)
+            print(learning)
+            print(native) 
             guard dataMysql.query(statement: "SELECT * from hl_users WHERE native_language LIKE \"%\(learning)%\" AND learning_language LIKE \"%\(native)%\"") else {
                 continue
             }
@@ -456,9 +457,11 @@ func getMatches(nativeLanguages: String, learningLanguage: String, userBirthdate
                     guard let tempUser = convertRowToUserWith(row: row) else {
                         break
                     }
-                    print("appending")
+                    print("appending: " + learning + " " + native)
                     listOfMatches.append(tempUser)
                 }
+            }else{
+                print("less than 1: " + learning + " " + native)
             }
         }
     }
