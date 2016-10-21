@@ -128,6 +128,36 @@ func getMatchList(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
     }
 }
 
+func getTranslateToken() -> String{
+    let scriptURL = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13/"
+    let msftClientID = "gethilingual"
+    let clientSecret = "huCULnjL60ctPpYpYMCOw1AZOXpnzHgFaSnzoOSuzp4=" 
+    let scope = "http://api.microsofttranslator.com/"
+    let grantType = "client_credentials"
+
+    guard let myUrl = URL(string: scriptURL) else {
+        return false
+    }
+    var request1 = URLRequest(url: myUrl)
+    request1.addValue("application/x-www-form-urlencoded; charset=utf8", forHTTPHeaderField: "Content-Type")
+    request1.addValue("utf8", forHTTPHeaderField: "Accept-Charset")
+    request1.HTTPBody = "grant_type=\(grantType)&scope=\(scope)&client_id=\(msftClientID)&client_secret=\(clientSecret)"
+    do {
+        var response: URLResponse?
+
+        try NSURLConnection.sendSynchronousRequest(request1, returning: &response)
+        if let httpResponse = response as? HTTPURLResponse {
+            if httpResponse.statusCode == 200 {
+                print(httpResponse.body)
+                return(httpResponse.body)
+            }
+        }
+    } catch let error as NSError {
+        if verbose {print(error.localizedDescription)}
+    }
+    return false
+}
+
 
 extension Array where Element : Equatable {
     var unique: [Element] {
