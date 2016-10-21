@@ -113,9 +113,9 @@ func getMatchList(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
 
     if verifyAuthToken(request: request, response, requestBodyDic) {
         let age = curUser.getBirthdate()
-        let nativeLanguages = curUser.getNativeLanguage()
+        let nativeLanguage = curUser.getNativeLanguage()
         let learningLanguage = curUser.getLearningLanguage()
-        let arrayOfMatches = getMatches(nativeLanguages: nativeLanguages, learningLanguage:learningLanguage, userBirthdate: age).unique
+        let arrayOfMatches = getMatches(nativeLanguage: nativeLanguage, learningLanguage:learningLanguage, userBirthdate: age).unique
         do {
             let encodedJSON = try Array(arrayOfMatches.prefix(20)).jsonEncodedString()
             response.setBody(string: encodedJSON)
