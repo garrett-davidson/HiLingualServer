@@ -95,22 +95,25 @@ func translateMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
 }
 
 func translateMessage(message: String, language: String) -> String? {
-    let scriptURL = "Http://api.microsofttranslator.com/V2/Http.svc/Translate"
+    let scriptURL = "http://api.microsofttranslator.com/V2/Http.svc/Translate?text=\(message)&to=\(language)&appid=&contentType=text/plain&category=general"
     guard let myUrl = URL(string: scriptURL) else {
         return nil
     }
     var request: URLRequest = URLRequest(url: myUrl)
-    let body = ["appid":"", "text": message, "to":language, "contentType":"text/plain", "category":"general"]
-    request.httpBody = try? JSONSerialization.data(withJSONObject: NSDictionary(dictionary:body), options: JSONSerialization.WritingOptions(rawValue: 0))
+    print("Langauge: " + language)
+//    let body = ["appid":"", "text": message, "to":language, "contentType":"text/plain", "category":"general"]
+//    request.httpBody = try? JSONSerialization.data(withJSONObject: NSDictionary(dictionary:body), options: JSONSerialization.WritingOptions(rawValue: 0))
+//    print(request.httpBody)
     guard let token = getTranslateToken() else {
         print("token failed")
         return nil
     }
-    let header = ["Authrization":token]
+    let header = ["Authorization":token, "Accept":"application/json"]
     request.allHTTPHeaderFields = header
     if verbose {
         print(request)
     }
+    request.httpMethod = "GET"
     var response: URLResponse?
     if let responseData = try? NSURLConnection.sendSynchronousRequest(request, returning: &response) {
         if verbose {
@@ -119,6 +122,7 @@ func translateMessage(message: String, language: String) -> String? {
         }
 
         if let returnString = NSString(data: responseData, encoding: String.Encoding.utf8.rawValue) {
+            print(returnString)
             return returnString as String
         }
     }

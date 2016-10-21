@@ -133,7 +133,7 @@ func getMatchList(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
 func getTranslateToken() -> String? {
     let scriptURL = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13/"
     let msftClientID = "gethilingual"
-    let clientSecret = "huCULnjL60ctPpYpYMCOw1AZOXpnzHgFaSnzoOSuzp4="
+    let clientSecret = "huCULnjL60ctPpYpYMCOw1AZOXpnzHgFaSnzoOSuzp4%3D"
     let scope = "http://api.microsofttranslator.com/"
     let grantType = "client_credentials"
 
@@ -147,15 +147,24 @@ func getTranslateToken() -> String? {
     let requestBodyData = dataString.data(using: String.Encoding.utf8, allowLossyConversion: true)
     request1.httpBody = requestBodyData
     var response: URLResponse?
+    print(dataString)
+    request1.httpMethod = "POST"
 
     if let body = try? NSURLConnection.sendSynchronousRequest(request1, returning: &response) {
+        print(body)
+        print( NSString(data: body, encoding: String.Encoding.utf8.rawValue))
         if let httpResponse = response as? HTTPURLResponse {
+            print(httpResponse.statusCode)
             if httpResponse.statusCode == 200 {
                 guard let returnString = NSString(data: body, encoding: String.Encoding.utf8.rawValue) else {
                     return nil
                 }
                 print(returnString)
-                return("Bearer" + (returnString as String))
+                if let ret = (try? JSONSerialization.jsonObject(with: body, options: JSONSerialization.ReadingOptions(rawValue: 0))) as? NSDictionary {
+                    if let token = ret["access_token"] as? String {
+                        return "Bearer " + token
+                    }
+                }
             }
         }
     }
