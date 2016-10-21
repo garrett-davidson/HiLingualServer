@@ -130,10 +130,10 @@ func getMatchList(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
     }
 }
 
-func getTranslateToken() -> String?{
+func getTranslateToken() -> String? {
     let scriptURL = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13/"
     let msftClientID = "gethilingual"
-    let clientSecret = "huCULnjL60ctPpYpYMCOw1AZOXpnzHgFaSnzoOSuzp4=" 
+    let clientSecret = "huCULnjL60ctPpYpYMCOw1AZOXpnzHgFaSnzoOSuzp4="
     let scope = "http://api.microsofttranslator.com/"
     let grantType = "client_credentials"
 

@@ -62,25 +62,25 @@ func translateMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         invalidAuth(request: request, response)
         return
     }
-    
+
     guard let language = request.param(name: "language") else {
         print("no language")
         invalidMessage(request: request, response)
         return
     }
-    
+
     guard let _ = lookupUserWith(sessionToken: auth) else {
         print("Invalid auth")
         invalidAuth(request: request, response)
         return
     }
-    
+
     guard let message = request.param(name: "message"), message.characters.count > 0 else {
         print("no message")
         invalidMessage(request: request, response)
         return
     }
-    
+
     if message.characters.count > 500 {
         print("message too long")
         invalidMessage(request: request, response)
@@ -100,7 +100,7 @@ func translateMessage(message: String, language: String) -> String? {
         return nil
     }
     var request: URLRequest = URLRequest(url: myUrl)
-    let body = ["appid":"","text": message,"to":language,"contentType":"text/plain","category":"general"]
+    let body = ["appid":"", "text": message, "to":language, "contentType":"text/plain", "category":"general"]
     request.httpBody = try? JSONSerialization.data(withJSONObject: NSDictionary(dictionary:body), options: JSONSerialization.WritingOptions(rawValue: 0))
     guard let token = getTranslateToken() else {
         print("token failed")
@@ -112,7 +112,7 @@ func translateMessage(message: String, language: String) -> String? {
         print(request)
     }
     var response: URLResponse?
-    if let responseData = try? NSURLConnection.sendSynchronousRequest(request, returning: &response){
+    if let responseData = try? NSURLConnection.sendSynchronousRequest(request, returning: &response) {
         if verbose {
             print(responseData)
             print(response)
@@ -123,7 +123,7 @@ func translateMessage(message: String, language: String) -> String? {
         }
     }
     return nil
-    
+
 }
 
 
