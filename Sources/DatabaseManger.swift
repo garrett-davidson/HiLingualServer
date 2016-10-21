@@ -27,7 +27,7 @@ let createUsersTableQuery = "CREATE TABLE IF NOT EXISTS \(usersTable)(" +
   "displayName TINYTEXT, " +
   "bio LONGTEXT, " +
   "gender TINYTEXT, " +
-  "birthdate DATETIME, " +
+  "birthdate BIGINT, " +
   "session_token LONGTEXT, " +
   "native_language LONGTEXT, " +
   "learning_language LONGTEXT, " +
@@ -142,19 +142,27 @@ func addPictureMessageToTable(sender: Int, recipient: Int, picture: String) {
 }
 
 func overwriteUserData(user: User) {
-    guard let name = user.getName().toBase64() else {
-        return
+    var name: String
+    var displayName: String
+    var bio: String
+    if let n  = user.getName().toBase64() {
+        name = "\"\(n)\""
+    } else {
+        name = "NULL"
     }
-
-    guard let displayName = user.getDisplayName().toBase64() else {
-        return
+    if let d = user.getDisplayName().toBase64() {
+        displayName = "\"\(d)\""
+    } else {
+        displayName = "NULL"
     }
-
-    guard let bio = user.getBio().toBase64() else {
-        return
+    if let b = user.getBio().toBase64() {
+        bio = "\"\(b)\""
+    } else {
+        bio = "NULL"
     }
-
-    guard dataMysql.query(statement: "UPDATE hl_users VALUE (\(user.getUserId()),\(name),\(displayName),\(bio),\(user.getGender()),\(user.getBirthdate()),NULL,NULL);") else {
+    let query = "UPDATE hl_users SET name = \(name), displayName = \(displayName), bio = \(bio), gender = \"\(user.getGender())\", birthdate = \(user.getBirthdate()), native_language = \"\(user.getNativeLanguage())\", learning_language = \"\(user.getLearningLanguage())\" WHERE user_id = \(user.getUserId());"
+    print(query)
+    guard dataMysql.query(statement: query) else {
         print("Error updating user")
         return
     }
@@ -628,15 +636,18 @@ func messageFrom(row: [String?]) -> Message? {
         return nil
     }
 
+    let dateFormatter = DateFormatter()
+    dateFormatter.timeZone = TimeZone(identifier: "GMT")!
+    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:SS"
     guard let sentTimestampString = row[1],
-          let sentTimestampInterval = Double(sentTimestampString) else {
+          let sentTimestamp = dateFormatter.date(from: sentTimestampString) else {
         if verbose {
             print("Invalid sent timestamp")
         }
         return nil
     }
+    print(sentTimestamp)
 
-    let sentTimestamp = Date(timeIntervalSince1970: sentTimestampInterval)
     let editTimestamp: Date?
 
     if let editTimestampString = row[2], let editTimestampInterval = Double(editTimestampString) {
