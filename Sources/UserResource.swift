@@ -1,4 +1,6 @@
 import PerfectLib
+import Foundation
+
 import PerfectHTTP
 
 func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
@@ -128,7 +130,7 @@ func getMatchList(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
     }
 }
 
-func getTranslateToken() -> String{
+func getTranslateToken() -> String?{
     let scriptURL = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13/"
     let msftClientID = "gethilingual"
     let clientSecret = "huCULnjL60ctPpYpYMCOw1AZOXpnzHgFaSnzoOSuzp4=" 
@@ -136,26 +138,32 @@ func getTranslateToken() -> String{
     let grantType = "client_credentials"
 
     guard let myUrl = URL(string: scriptURL) else {
-        return false
+        return nil
     }
     var request1 = URLRequest(url: myUrl)
     request1.addValue("application/x-www-form-urlencoded; charset=utf8", forHTTPHeaderField: "Content-Type")
     request1.addValue("utf8", forHTTPHeaderField: "Accept-Charset")
-    request1.HTTPBody = "grant_type=\(grantType)&scope=\(scope)&client_id=\(msftClientID)&client_secret=\(clientSecret)"
+    let dataString = "grant_type=\(grantType)&scope=\(scope)&client_id=\(msftClientID)&client_secret=\(clientSecret)"
+    let requestBodyData = dataString.data(using: String.Encoding.utf8, allowLossyConversion: true)
+    request1.httpBody = requestBodyData
     do {
         var response: URLResponse?
 
-        try NSURLConnection.sendSynchronousRequest(request1, returning: &response)
-        if let httpResponse = response as? HTTPURLResponse {
-            if httpResponse.statusCode == 200 {
-                print(httpResponse.body)
-                return(httpResponse.body)
+        if let body = try? NSURLConnection.sendSynchronousRequest(request1, returning: &response) {
+            if let httpResponse = response as? HTTPURLResponse {
+                if httpResponse.statusCode == 200 {
+                    guard let returnString = NSString(data: body, encoding: String.Encoding.utf8.rawValue) else {
+                        return nil
+                    }
+                    print(returnString)
+                    return("Bearer" + (returnString as String))
+                }
             }
         }
     } catch let error as NSError {
         if verbose {print(error.localizedDescription)}
     }
-    return false
+    return nil
 }
 
 
