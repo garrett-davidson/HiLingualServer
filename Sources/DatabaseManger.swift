@@ -160,7 +160,7 @@ func overwriteUserData(user: User) {
     } else {
         bio = "NULL"
     }
-    let query = "UPDATE hl_users SET name = \(name), displayName = \(displayName), bio = \(bio), gender = \"\(user.getGender())\", birthdate = \(user.getBirthdate()), native_language = \"\(user.getNativeLanguage())\", learning_language = \"\(user.getLearningLanguage)\" WHERE user_id = \(user.getUserId());"
+    let query = "UPDATE hl_users SET name = \(name), displayName = \(displayName), bio = \(bio), gender = \"\(user.getGender())\", birthdate = \(user.getBirthdate()), native_language = \"\(user.getNativeLanguage())\", learning_language = \"\(user.getLearningLanguage())\" WHERE user_id = \(user.getUserId());"
     print(query)
     guard dataMysql.query(statement: query) else {
         print("Error updating user")
