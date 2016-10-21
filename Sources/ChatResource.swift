@@ -93,7 +93,7 @@ func getMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
 
     if messages.count < 1 {
         print("no messages with that id")
-        invalidMessage(request: request, response)
+        response.setBody(string: "{ \"Messages\":[]}")
         return
     }
 
