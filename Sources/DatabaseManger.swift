@@ -634,15 +634,18 @@ func messageFrom(row: [String?]) -> Message? {
         return nil
     }
 
+    let dateFormatter = DateFormatter()
+    dateFormatter.timeZone = TimeZone(identifier: "GMT")!
+    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:SS"
     guard let sentTimestampString = row[1],
-          let sentTimestampInterval = Double(sentTimestampString) else {
+          let sentTimestamp = dateFormatter.date(from: sentTimestampString) else {
         if verbose {
             print("Invalid sent timestamp")
         }
         return nil
     }
+    print(sentTimestamp)
 
-    let sentTimestamp = Date(timeIntervalSince1970: sentTimestampInterval)
     let editTimestamp: Date?
 
     if let editTimestampString = row[2], let editTimestampInterval = Double(editTimestampString) {
