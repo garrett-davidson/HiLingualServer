@@ -146,23 +146,20 @@ func getTranslateToken() -> String?{
     let dataString = "grant_type=\(grantType)&scope=\(scope)&client_id=\(msftClientID)&client_secret=\(clientSecret)"
     let requestBodyData = dataString.data(using: String.Encoding.utf8, allowLossyConversion: true)
     request1.httpBody = requestBodyData
-    do {
-        var response: URLResponse?
+    var response: URLResponse?
 
-        if let body = try? NSURLConnection.sendSynchronousRequest(request1, returning: &response) {
-            if let httpResponse = response as? HTTPURLResponse {
-                if httpResponse.statusCode == 200 {
-                    guard let returnString = NSString(data: body, encoding: String.Encoding.utf8.rawValue) else {
-                        return nil
-                    }
-                    print(returnString)
-                    return("Bearer" + (returnString as String))
+    if let body = try? NSURLConnection.sendSynchronousRequest(request1, returning: &response) {
+        if let httpResponse = response as? HTTPURLResponse {
+            if httpResponse.statusCode == 200 {
+                guard let returnString = NSString(data: body, encoding: String.Encoding.utf8.rawValue) else {
+                    return nil
                 }
+                print(returnString)
+                return("Bearer" + (returnString as String))
             }
         }
-    } catch let error as NSError {
-        if verbose {print(error.localizedDescription)}
     }
+
     return nil
 }
 

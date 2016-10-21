@@ -48,6 +48,85 @@ func handleAudio(request: HTTPRequest, _ response: HTTPResponse) {
     response.completed()
 }
 
+func handleTranslation(request: HTTPRequest, _ response: HTTPResponse) {
+    //parse uri and call relevant funtion
+    response.setHeader(.contentType, value: "text/html")
+    response.setBody(string: "<html><title>Audio</title><body>Chat resource Audio</body></html>")
+    translateMessageWith(request: request, response)
+    response.completed()
+}
+
+func translateMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
+    guard let auth = request.param(name: "auth") else {
+        print("no auth token")
+        invalidAuth(request: request, response)
+        return
+    }
+    
+    guard let language = request.param(name: "language") else {
+        print("no language")
+        invalidMessage(request: request, response)
+        return
+    }
+    
+    guard let _ = lookupUserWith(sessionToken: auth) else {
+        print("Invalid auth")
+        invalidAuth(request: request, response)
+        return
+    }
+    
+    guard let message = request.param(name: "message"), message.characters.count > 0 else {
+        print("no message")
+        invalidMessage(request: request, response)
+        return
+    }
+    
+    if message.characters.count > 500 {
+        print("message too long")
+        invalidMessage(request: request, response)
+        return
+    }
+    guard let translatedString = translateMessage(message: message, language: language) else {
+        print("invalid translation")
+        invalidMessage(request: request, response)
+        return
+    }
+    response.setBody(string: translatedString)
+}
+
+func translateMessage(message: String, language: String) -> String? {
+    let scriptURL = "Http://api.microsofttranslator.com/V2/Http.svc/Translate"
+    guard let myUrl = URL(string: scriptURL) else {
+        return nil
+    }
+    var request: URLRequest = URLRequest(url: myUrl)
+    let body = ["appid":"","text": message,"to":language,"contentType":"text/plain","category":"general"]
+    request.httpBody = try? JSONSerialization.data(withJSONObject: NSDictionary(dictionary:body), options: JSONSerialization.WritingOptions(rawValue: 0))
+    guard let token = getTranslateToken() else {
+        print("token failed")
+        return nil
+    }
+    let header = ["Authrization":token]
+    request.allHTTPHeaderFields = header
+    if verbose {
+        print(request)
+    }
+    var response: URLResponse?
+    if let responseData = try? NSURLConnection.sendSynchronousRequest(request, returning: &response){
+        if verbose {
+            print(responseData)
+            print(response)
+        }
+
+        if let returnString = NSString(data: responseData, encoding: String.Encoding.utf8.rawValue) {
+            return returnString as String
+        }
+    }
+    return nil
+    
+}
+
+
 func getMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     guard let auth = request.param(name: "auth") else {
         print("no auth token")
