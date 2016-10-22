@@ -1,4 +1,6 @@
 import PerfectLib
+import Foundation
+
 import PerfectHTTP
 
 func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
@@ -126,6 +128,48 @@ func getMatchList(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
     } else {
         errorResponse(response: response)
     }
+}
+
+func getTranslateToken() -> String? {
+    let scriptURL = "https://datamarket.accesscontrol.windows.net/v2/OAuth2-13/"
+    let msftClientID = "gethilingual"
+    let clientSecret = "huCULnjL60ctPpYpYMCOw1AZOXpnzHgFaSnzoOSuzp4%3D"
+    let scope = "http://api.microsofttranslator.com/"
+    let grantType = "client_credentials"
+
+    guard let myUrl = URL(string: scriptURL) else {
+        return nil
+    }
+    var request1 = URLRequest(url: myUrl)
+    request1.addValue("application/x-www-form-urlencoded; charset=utf8", forHTTPHeaderField: "Content-Type")
+    request1.addValue("utf8", forHTTPHeaderField: "Accept-Charset")
+    let dataString = "grant_type=\(grantType)&scope=\(scope)&client_id=\(msftClientID)&client_secret=\(clientSecret)"
+    let requestBodyData = dataString.data(using: String.Encoding.utf8, allowLossyConversion: true)
+    request1.httpBody = requestBodyData
+    var response: URLResponse?
+    print(dataString)
+    request1.httpMethod = "POST"
+
+    if let body = try? NSURLConnection.sendSynchronousRequest(request1, returning: &response) {
+        print(body)
+        print( NSString(data: body, encoding: String.Encoding.utf8.rawValue))
+        if let httpResponse = response as? HTTPURLResponse {
+            print(httpResponse.statusCode)
+            if httpResponse.statusCode == 200 {
+                guard let returnString = NSString(data: body, encoding: String.Encoding.utf8.rawValue) else {
+                    return nil
+                }
+                print(returnString)
+                if let ret = (try? JSONSerialization.jsonObject(with: body, options: JSONSerialization.ReadingOptions(rawValue: 0))) as? NSDictionary {
+                    if let token = ret["access_token"] as? String {
+                        return "Bearer " + token
+                    }
+                }
+            }
+        }
+    }
+
+    return nil
 }
 
 

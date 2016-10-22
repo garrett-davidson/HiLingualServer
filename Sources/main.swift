@@ -35,6 +35,7 @@ func runServer() {
     routes.add(method: .get, uri: "/asset/**", handler: handleAsset)
     routes.add(method: .get, uri: "/chat/**", handler: handleChatGet)
     routes.add(method: .post, uri: "/chat/**", handler: handleChat)
+    routes.add(method: .post, uri: "/translate", handler: handleTranslation)
     routes.add(method: .post, uri: "/picture", handler: handlePicture)
     routes.add(method: .post, uri: "/audio", handler: handleAudio)
     routes.add(method: .get, uri: "/flashcard", handler: handleFlashcard)
