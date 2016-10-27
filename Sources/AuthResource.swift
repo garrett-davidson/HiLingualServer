@@ -198,10 +198,6 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
         badRequestResponse(response: response)
         return
     }
-    if !authorityProvider.isAlphanumeric || !authorityAccountId.isAlphanumeric || !authorityToken.isAlphanumeric {
-        badRequestResponse(response: response)
-        return
-    }
     if verifyAuthToken(request: request, response, requestBodyDic) {
         guard let token = requestBodyDic["authorityToken"] as? String else {
             if verbose {print("no auth token sent")}
