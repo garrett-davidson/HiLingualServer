@@ -133,10 +133,6 @@ func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic:
         badRequestResponse(response: response)
         return
     }
-    if !authorityProvider.isAlphanumeric || !authorityAccountId.isAlphanumeric || !authorityToken.isAlphanumeric {
-        badRequestResponse(response: response)
-        return
-    }
     if verifyAuthToken(request: request, response, requestBodyDic) {
         print("attempting to login user")
         guard loginUserWith(authAccountId: authorityAccountId, sessionId: authorityToken) != nil else{
