@@ -75,13 +75,13 @@ func translateMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         return
     }
 
-    guard let message = request.param(name: "message"), message.characters.count > 0 else {
+    guard let message = request.param(name: "message") else {
         print("no message")
         invalidMessage(request: request, response)
         return
     }
 
-    if message.characters.count > 500 {
+    if message.characters.count > 100 {
         print("message too long")
         invalidMessage(request: request, response)
         return
@@ -162,11 +162,6 @@ func getMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         return
     }
 
-    if recipient == sender.getUserId() {
-        print("Can't receive messages from your self")
-        invalidMessage(request: request, response)
-        return
-    }
 
     guard let messages = getMessages(withSessionToken: auth, forUser: recipient) else {
         print("failed to get messages from database")
@@ -242,12 +237,6 @@ func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         return
     }
 
-    if recipient == sender.getUserId() {
-        print("Can't send to self")
-        invalidMessage(request: request, response)
-        return
-    }
-
     addMessageToTable(sender: sender.getUserId(), recipient: recipient, message: message)
     let notification = NSNotification(name: NSNotification.Name(rawValue: "Received message"), object: nil, userInfo: ["Sender": sender, "Recipient": recipient, "Message": message])
     send(notification: notification, toUser: recipient)
@@ -274,11 +263,6 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
 
     var ary = [[String:Any]]()
 
-    if uploads.count > 1 {
-        print("more than one picture")
-        invalidMessage(request: request, response)
-        return
-    }
     ary.append([
         "fieldName": uploads[0].fieldName,
         "contentType": uploads[0].contentType,
@@ -294,12 +278,6 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     print("upload picture")
     print("auth=\(auth)")
     print("recipient=\(recipientString)")
-
-    if uploads[0].fileSize > 10000000 {
-        print("picture is too big")
-        invalidMessage(request: request, response)
-        return
-    }
 
     guard let recipient = Int(recipientString) else {
         invalidMessage(request: request, response)
@@ -370,13 +348,6 @@ func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         "tmpFileName": uploads[0].tmpFileName
         ])
     let fileUrl = URL(fileURLWithPath: uploads[0].tmpFileName)
-    do {
-        let _ = try AVAudioPlayer(contentsOf: fileUrl)
-    } catch {
-        invalidMessage(request: request, response)
-        print("Invalid Audio")
-        return
-    }
     print("upload audio")
     print("auth=\(auth)")
     print("recipient=\(recipientString)")

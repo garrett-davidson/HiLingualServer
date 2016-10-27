@@ -16,14 +16,10 @@ func requestFlashcards(request: HTTPRequest, _ response: HTTPResponse) {
         invalidUser(request: request, response)
         return
     }
-    guard let setId = request.param(name: "setid") else {
-        print("no setId")
-        invalidFlashcard(request: request, response)
-        return
-    }
+    let setId = request.param(name: "setid")
     //Check to see auth is good
     //get user id
-    if setId.characters.count > 50 || setId.characters.count < 1 {
+    if setId!.characters.count > 50 || setId!.characters.count < 1 {
         print("invalid setid")
         invalidFlashcard(request: request, response)
         return
@@ -33,7 +29,7 @@ func requestFlashcards(request: HTTPRequest, _ response: HTTPResponse) {
         invalidUser(request: request, response)
         return
     }
-    guard let flashcardRings = getFlashcards(userId: requestingUser.getUserId(), setId: setId) else {
+    guard let flashcardRings = getFlashcards(userId: requestingUser.getUserId(), setId: setId!) else {
         print("failed to get Flashcards from database")
         invalidFlashcard(request: request, response)
         return
@@ -71,11 +67,8 @@ func newFlashcards(request: HTTPRequest, _ response: HTTPResponse) {
     if verbose {
         print(auth)
     }
-    guard let requestingUser = lookupUserWith(sessionToken: auth) else {
-        print("invalid auth")
-        invalidUser(request: request, response)
-        return
-    }
+
+    let requestingUser = lookupUserWith(sessionToken: auth)
 
     guard request.postBodyString != nil else {
         invalidFlashcard(request: request, response)
@@ -141,13 +134,13 @@ func newFlashcards(request: HTTPRequest, _ response: HTTPResponse) {
             flashcardRing.append(newFlashcard)
 
         }
-        let real = checkFlashcards(setId: setId, userId: requestingUser.getUserId())
+        let real = checkFlashcards(setId: setId, userId: requestingUser!.getUserId())
         if real {
             print("Editing Flashcards")
-            editFlashcards(setId: setId, userId: requestingUser.getUserId(), flashcards: flashcardRing)
+            editFlashcards(setId: setId, userId: requestingUser!.getUserId(), flashcards: flashcardRing)
         } else {
             print("Storing Flashcards")
-            storeFlashcards(setId: setId, userId: requestingUser.getUserId(), flashcards: flashcardRing)
+            storeFlashcards(setId: setId, userId: requestingUser!.getUserId(), flashcards: flashcardRing)
         }
 
     } catch {

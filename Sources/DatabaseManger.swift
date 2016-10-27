@@ -160,7 +160,7 @@ func overwriteUserData(user: User) {
     } else {
         bio = "NULL"
     }
-    let query = "UPDATE hl_users SET name = \(name), displayName = \(displayName), bio = \(bio), gender = \"\(user.getGender())\", birthdate = \(user.getBirthdate()), native_language = \"\(user.getNativeLanguage())\", learning_language = \"\(user.getLearningLanguage())\" WHERE user_id = \(user.getUserId());"
+    let query = "UPDATE hl_users SET name = \(name), displayName = \(displayName), gender = \"\(user.getGender())\", birthdate = \(user.getBirthdate()), native_language = \"\(user.getNativeLanguage())\", learning_language = \"\(user.getLearningLanguage())\" WHERE user_id = \(user.getUserId());"
     print(query)
     guard dataMysql.query(statement: query) else {
         print("Error updating user")
@@ -268,7 +268,7 @@ func createUserWith(token: String, authorityAccountId: String) -> User? {
         return false
     }
 
-    guard dataMysql.query(statement: "UPDATE hl_users SET session_token = NULL WHERE session_token = \"\(sessionId)\";") else {
+    guard dataMysql.query(statement: "UPDATE hl_users SET session_token = \"\(sessionId)\" WHERE session_token = \"\(sessionId)\";") else {
         return false
     }
     return true
@@ -313,7 +313,7 @@ func isValid(userId: Int) -> Bool {
         return false
     }
 
-    return dataMysql.storeResults()?.numRows() == 1
+    return true
 }
 
 func convertRowToFlashcard(row: [String?]) -> Flashcard? {
@@ -434,7 +434,7 @@ func lookupUserWith(sessionToken: String) -> User? {
     return tempUser.getSessionToken() == sessionToken ? tempUser : nil
 }
 
-func getMatches(nativeLanguage: String, learningLanguage: String, userBirthdate: Int) -> [Int] {
+func getMatches(nativeLanguage: String, learningLanguage: String, userBirthdate: Int) -> [User] {
     var listOfMatches = [User]()
     let learningArray = learningLanguage.components(separatedBy: ",")
     let nativeArray = nativeLanguage.components(separatedBy: ",")
@@ -470,11 +470,11 @@ func getMatches(nativeLanguage: String, learningLanguage: String, userBirthdate:
     }
 
     let sortedArray = listOfMatches.sorted {abs($0.getBirthdate() - userBirthdate) < abs($1.getBirthdate() - userBirthdate)}
-    var finalArray = [Int]()
+    var finalArray = [User]()
     for user in sortedArray {
-        finalArray.append(user.getUserId())
+        finalArray.append(user)
     }
-    return finalArray
+    return listOfMatches
 }
 
 func getFlashcards(userId: Int, setId: String) -> [Flashcard]? {

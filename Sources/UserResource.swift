@@ -41,7 +41,7 @@ func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
             }
         } else {
             print("bad request")
-            badRequestResponse(response: response)
+           // badRequestResponse(response: response)
             return
         }
 
@@ -55,11 +55,7 @@ func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
 
 func editUserInfo(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: [String: AnyObject]) {
     print("Editing User")
-    guard let authToken = requestBodyDic["authorityToken"] as? String else {
-        print("bad auth token")
-        badRequestResponse(response: response)
-        return
-    }
+    let authToken = requestBodyDic["authorityToken"] as! String
     guard let curUser = lookupUserWith(sessionToken: authToken) else {
         print("failed to lookup user")
         badRequestResponse(response: response)
@@ -67,9 +63,7 @@ func editUserInfo(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
     }
 
 
-    if let name = requestBodyDic["name"] as? String {
-        curUser.setName(newName: name)
-    }
+    curUser.setName(newName: requestBodyDic["name"] as! String)
     if let displayName = requestBodyDic["displayName"] as? String {
        curUser.setDisplayName(newDisplayName:displayName)
     }
@@ -119,7 +113,7 @@ func getMatchList(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
         let learningLanguage = curUser.getLearningLanguage()
         let arrayOfMatches = getMatches(nativeLanguage: nativeLanguage, learningLanguage:learningLanguage, userBirthdate: age).unique
         do {
-            let encodedJSON = try Array(arrayOfMatches.prefix(20)).jsonEncodedString()
+            let encodedJSON = try Array(arrayOfMatches.prefix(10)).jsonEncodedString()
             response.setBody(string: encodedJSON)
         } catch {
             if verbose {print(error)}

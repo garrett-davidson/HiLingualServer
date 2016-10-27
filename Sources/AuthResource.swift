@@ -24,19 +24,12 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
     }
 
     //deserialize request JSON body to Dictionary
-    guard let jsonString = request.postBodyString else {
-        if verbose {
-            print("Empty body")
-            print("bad request, nojson body")
-        }
-        badRequestResponse(response: response)
-        return
-    }
+    let jsonString = request.postBodyString 
 
     // swiftlint:disable opening_brace
     var urlStringArray = urlString.characters.split{$0 == "/"}.map(String.init)
     do {
-        guard let result = try jsonString.jsonDecode() as? [String: AnyObject] else {
+        guard let result = try jsonString!.jsonDecode() as? [String: AnyObject] else {
             if verbose {print("invalid json string")}
             return
         }
@@ -63,13 +56,10 @@ func verifyAuthToken(request: HTTPRequest, _ response: HTTPResponse, _ requestBo
     //
     guard let token = requestBodyDic["authorityToken"] as? String else {
         if verbose {print("no auth token sent")}
-        badRequestResponse(response: response)
+        //badRequestResponse(response: response)
         return false
     }
-    guard let auth = requestBodyDic["authority"] as? String else {
-        if verbose {print("no authority sent")}
-        return false
-    }
+    let auth = requestBodyDic["authority"] as! String
     if auth == "FACEBOOK" {
         if checkFacebookAuthority(token) {
             return true
@@ -82,7 +72,7 @@ func verifyAuthToken(request: HTTPRequest, _ response: HTTPResponse, _ requestBo
         unauthorizedResponse(response: response)
     } else {
         if verbose {print("bad authority sent")}
-        unauthorizedResponse(response: response)
+        //unauthorizedResponse(response: response)
     }
     return false
 }
@@ -132,10 +122,7 @@ func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic:
         print(requestBodyDic["authorityAccountId"])
         print(requestBodyDic["authorityToken"])
     }
-    guard let authorityProvider = requestBodyDic["authority"] as? String else {
-        badRequestResponse(response: response)
-        return
-    }
+    let authorityProvider = requestBodyDic["authority"] as! String 
     guard let authorityAccountId = requestBodyDic["authorityAccountId"] as? String else {
         if verbose {print("no authID sent")}
         badRequestResponse(response: response)
@@ -190,10 +177,7 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
         badRequestResponse(response: response)
         return
     }
-    guard let authorityAccountId = requestBodyDic["authorityAccountId"] as? String else {
-        badRequestResponse(response: response)
-        return
-    }
+    let authorityAccountId = requestBodyDic["authorityAccountId"] as! String 
     guard let authorityToken = requestBodyDic["authorityToken"] as? String else {
         badRequestResponse(response: response)
         return
@@ -208,13 +192,9 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
             return
         }
 
-        guard let user = createUserWith(token: token, authorityAccountId: authorityAccountId) else {
-            if verbose {print("database error or user exists")}
-            badRequestResponse(response: response)
-            return
-        }
-        print("userid: " + String(user.getUserId()) + " token: " + user.getSessionToken())
-        let dict: [String: Any] = ["userId": user.getUserId(), "sessionToken": user.getSessionToken()]
+        let user = createUserWith(token: token, authorityAccountId: authorityAccountId) 
+        print("userid: " + String(user!.getUserId()) + " token: " + user!.getSessionToken())
+        let dict: [String: Any] = ["userId": user!.getUserId(), "sessionToken": user!.getSessionToken()]
         do {
             try response.setBody(json: dict)
         } catch {
