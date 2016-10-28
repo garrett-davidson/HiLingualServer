@@ -132,7 +132,7 @@ func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic:
         print(requestBodyDic["authorityAccountId"])
         print(requestBodyDic["authorityToken"])
     }
-    guard let authorityProvider = requestBodyDic["authority"] as? String else {
+    guard let _ = requestBodyDic["authority"] as? String else {
         badRequestResponse(response: response)
         return
     }
@@ -143,10 +143,6 @@ func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic:
     }
     guard let authorityToken = requestBodyDic["authorityToken"] as? String else {
         if verbose {print("no auth token sent")}
-        badRequestResponse(response: response)
-        return
-    }
-    if !authorityProvider.isAlphanumeric || !authorityAccountId.isAlphanumeric || !authorityToken.isAlphanumeric {
         badRequestResponse(response: response)
         return
     }
@@ -186,19 +182,15 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
         print(requestBodyDic["authorityAccountId"])
         print(requestBodyDic["authorityToken"])
     }
-    guard let authorityProvider = requestBodyDic["authority"] as? String else {
+    guard let _ = requestBodyDic["authority"] as? String else {
         badRequestResponse(response: response)
         return
     }
-    guard let authorityAccountId = requestBodyDic["authorityAccountId"] as? String else {
+    guard let _ = requestBodyDic["authorityAccountId"] as? String else {
         badRequestResponse(response: response)
         return
     }
-    guard let authorityToken = requestBodyDic["authorityToken"] as? String else {
-        badRequestResponse(response: response)
-        return
-    }
-    if !authorityProvider.isAlphanumeric || !authorityAccountId.isAlphanumeric || !authorityToken.isAlphanumeric {
+    guard let _ = requestBodyDic["authorityToken"] as? String else {
         badRequestResponse(response: response)
         return
     }

@@ -39,8 +39,7 @@ func requestFlashcards(request: HTTPRequest, _ response: HTTPResponse) {
         return
     }
     if flashcardRings.count < 1 {
-        print("no flashcard with that name")
-        invalidFlashcard(request: request, response)
+        response.setBody(string: "{:[]}")
         return
     }
     response.setBody(string: "{ \"\(setId)\":[")
