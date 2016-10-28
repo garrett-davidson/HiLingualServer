@@ -550,7 +550,7 @@ func getMessages(withSessionToken token: String, forUser receivingUserId: Int) -
     var messages = [Message]()
 
     let results = dataMysql.storeResults()
-
+    print(results)
     while let row = results?.next() {
         if let message = messageFrom(row: row) {
             messages.append(message)
@@ -679,17 +679,34 @@ func messageFrom(row: [String?]) -> Message? {
         }
         return nil
     }
-
-    guard let message = row[5]?.fromBase64() else {
-        if verbose {
-            print("Invalid message body")
+    var message = row[5]?.fromBase64()
+    if message == nil {
+        message = row[7]
+        if  message == nil {
+            if verbose {
+                print("No audio body")
+            }
+            message = row[8]
+            if message == nil {
+                if verbose {
+                    print("No picture body")
+                }
+                return nil
+            }
+            let splitMessage = message!.characters.split {$0 == "/"}.map(String.init)
+            message = "picture: " + splitMessage[splitMessage.count-1]
+        } else {
+            let splitMessage = message!.characters.split {$0 == "/"}.map(String.init)
+            message = "audio: " + splitMessage[splitMessage.count-1]
         }
-        return nil
+        if verbose {
+            print("No message body")
+        }
     }
 
     let editedMessage = row[6]?.fromBase64()
 
-    return Message(messageId: id, sentTimestamp: sentTimestamp, editTimestamp: editTimestamp, sender: senderId, receiver: receiverId, body: message, editedBody: editedMessage)
+    return Message(messageId: id, sentTimestamp: sentTimestamp, editTimestamp: editTimestamp, sender: senderId, receiver: receiverId, body: message!, editedBody: editedMessage)
 }
 
 func apnsToken(forUser user: Int) -> String? {
