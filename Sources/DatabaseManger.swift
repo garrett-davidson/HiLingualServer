@@ -300,10 +300,12 @@ func createUserWith(token: String, authorityAccountId: String) -> User? {
     print(authAccountId)
     if tempUser.getAuthorityAccountId() == authAccountId {
         guard dataMysql.query(statement: "UPDATE hl_users SET session_token =\"\(sessionId)\" WHERE authority_account_id = \"\(authAccountId)\"") else {
+            print("Could not update user")
             return nil
         }
         return tempUser
     } else {
+        print("Could not find matching user")
         return nil
     }
 }
@@ -392,7 +394,7 @@ func convertRowToUserWith(row: [String?]) -> User? {
         newUser.setLearningLanguage(newLearningLanguage: learningLanguage)
     }
 
-    if let authAccountId = row[9] {
+    if let authAccountId = row[10] {
         newUser.setAuthorityAccountId(newAuthorityAccountId: authAccountId)
     }
 
@@ -403,6 +405,7 @@ func lookupUserWith(sessionToken: String) -> User? {
     guard dataMysql.query(statement: "SELECT * FROM hl_users WHERE session_token = \"\(sessionToken)\";") else {
         if verbose {
             print("User with given session token does not exist")
+            print("Given session token: \(sessionToken)")
         }
         return nil
     }

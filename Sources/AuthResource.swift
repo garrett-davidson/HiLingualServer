@@ -149,7 +149,7 @@ func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic:
     if verifyAuthToken(request: request, response, requestBodyDic) {
         print("attempting to login user")
         guard loginUserWith(authAccountId: authorityAccountId, sessionId: authorityToken) != nil else{
-            print("databse error or user does not exist")
+            print("database error or user does not exist")
             badRequestResponse(response: response)
             return
         }
