@@ -117,7 +117,7 @@ func addMessageToTable(sender: Int, recipient: Int, message: String) {
         print("Unable to encode message")
         return
     }
-    guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,1,\(recipient),\"\(encodedMessage)\",NULL,NULL,NULL);") else {
+    guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,\(sender),\(recipient),\"\(encodedMessage)\",NULL,NULL,NULL);") else {
         print("Error inserting into hl_chat_messages")
         return
     }
@@ -125,7 +125,7 @@ func addMessageToTable(sender: Int, recipient: Int, message: String) {
 }
 
 func addAudioMessageToTable(sender: Int, recipient: Int, audio: String) {
-    guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,1,\(recipient),NULL,NULL,NULL,\"\(audio)\");") else {
+    guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,\(sender),\(recipient),NULL,NULL,NULL,\"\(audio)\");") else {
         print("Error inserting into hl_chat_messages with audio")
         return
     }
@@ -133,7 +133,7 @@ func addAudioMessageToTable(sender: Int, recipient: Int, audio: String) {
 
 }
 func addPictureMessageToTable(sender: Int, recipient: Int, picture: String) {
-    guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,1,\(recipient),NULL,NULL,\"\(picture)\",NULL);") else {
+    guard dataMysql.query(statement: "INSERT INTO hl_chat_messages VALUE (NULL,NULL,NULL,\(sender),\(recipient),NULL,NULL,\"\(picture)\",NULL);") else {
         print("Error inserting into hl_chat_messages with audio")
         return
     }
@@ -384,15 +384,15 @@ func convertRowToUserWith(row: [String?]) -> User? {
         }
         newUser.setSessionToken(newSessionToken: sessionToken)
     }
-    if let nativeLanguage = row[8] {
+    if let nativeLanguage = row[7] {
         newUser.setNativeLanguage(newNativeLanguage: nativeLanguage)
     }
 
-    if let learningLanguage = row[9] {
+    if let learningLanguage = row[8] {
         newUser.setLearningLanguage(newLearningLanguage: learningLanguage)
     }
 
-    if let authAccountId = row[10] {
+    if let authAccountId = row[9] {
         newUser.setAuthorityAccountId(newAuthorityAccountId: authAccountId)
     }
 
