@@ -101,9 +101,7 @@ func translateMessage(message: String, language: String) -> String? {
     }
     var request: URLRequest = URLRequest(url: myUrl)
     print("Langauge: " + language)
-//    let body = ["appid":"", "text": message, "to":language, "contentType":"text/plain", "category":"general"]
-//    request.httpBody = try? JSONSerialization.data(withJSONObject: NSDictionary(dictionary:body), options: JSONSerialization.WritingOptions(rawValue: 0))
-//    print(request.httpBody)
+
     guard let token = getTranslateToken() else {
         print("token failed")
         return nil

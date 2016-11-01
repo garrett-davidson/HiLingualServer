@@ -24,7 +24,7 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
     }
 
     //deserialize request JSON body to Dictionary
-    let jsonString = request.postBodyString 
+    let jsonString = request.postBodyString
 
     // swiftlint:disable opening_brace
     var urlStringArray = urlString.characters.split{$0 == "/"}.map(String.init)
@@ -122,7 +122,7 @@ func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic:
         print(requestBodyDic["authorityAccountId"])
         print(requestBodyDic["authorityToken"])
     }
-    let authorityProvider = requestBodyDic["authority"] as! String 
+    let authorityProvider = requestBodyDic["authority"] as! String
     guard let authorityAccountId = requestBodyDic["authorityAccountId"] as? String else {
         if verbose {print("no authID sent")}
         badRequestResponse(response: response)
@@ -169,11 +169,11 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
         print(requestBodyDic["authorityAccountId"])
         print(requestBodyDic["authorityToken"])
     }
-    guard let authorityProvider = requestBodyDic["authority"] as? String else {
+    guard let _ = requestBodyDic["authority"] as? String else {
         badRequestResponse(response: response)
         return
     }
-    let authorityAccountId = requestBodyDic["authorityAccountId"] as! String 
+    let authorityAccountId = requestBodyDic["authorityAccountId"] as! String
     guard let authorityToken = requestBodyDic["authorityToken"] as? String else {
         badRequestResponse(response: response)
         return
@@ -188,7 +188,7 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
             return
         }
 
-        let user = createUserWith(token: token, authorityAccountId: authorityAccountId) 
+        let user = createUserWith(token: token, authorityAccountId: authorityAccountId)
         print("userid: " + String(user!.getUserId()) + " token: " + user!.getSessionToken())
         let dict: [String: Any] = ["userId": user!.getUserId(), "sessionToken": user!.getSessionToken()]
         do {
