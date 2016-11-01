@@ -313,6 +313,8 @@ func isValid(userId: Int) -> Bool {
         return false
     }
 
+    dataMysql.storeResults()
+
     return true
 }
 
@@ -403,6 +405,9 @@ func lookupUserWith(sessionToken: String) -> User? {
     guard dataMysql.query(statement: "SELECT * FROM hl_users WHERE session_token = \"\(sessionToken)\";") else {
         if verbose {
             print("User with given session token does not exist")
+            print("Given session token: \(sessionToken)")
+            print(dataMysql.errorCode())
+            print(dataMysql.errorMessage())
         }
         return nil
     }

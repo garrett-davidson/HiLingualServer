@@ -150,7 +150,7 @@ func getMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
 
     guard isValid(userId: recipient) else {
         invalidMessage(request: request, response)
-        print("Invalid recipient ID")
+        print("Invalid recipient user")
         return
     }
 
@@ -219,13 +219,13 @@ func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
     print("message=\(message)")
     guard let recipient = Int(recipientString) else {
         invalidMessage(request: request, response)
-        print("invalid recipient ID")
+        print("invalid recipient ID sending")
         return
     }
 
     guard isValid(userId: recipient) else {
         invalidMessage(request: request, response)
-        print("Invalid recipient ID")
+        print("Invalid recipient user sending")
         return
     }
 
@@ -279,13 +279,13 @@ func sendPictureMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
 
     guard let recipient = Int(recipientString) else {
         invalidMessage(request: request, response)
-        print("Invalid recipient ID")
+        print("Invalid recipient ID picture")
         return
     }
 
     guard isValid(userId: recipient) else {
         invalidMessage(request: request, response)
-        print("Invalid recipient ID")
+        print("Invalid recipient user picture")
         return
     }
 
@@ -358,13 +358,13 @@ func sendAudioMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
 
     guard let recipient = Int(recipientString) else {
         invalidMessage(request: request, response)
-        print("Invalid recipient ID")
+        print("Invalid recipient ID audio")
         return
     }
 
     guard isValid(userId: recipient) else {
         invalidMessage(request: request, response)
-        print("Invalid recipient ID")
+        print("Invalid recipient user audio")
         return
     }
 

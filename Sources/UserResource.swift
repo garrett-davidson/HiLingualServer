@@ -29,6 +29,8 @@ func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
             print("invalid json string")
             return
         }
+        let authToken = result["authorityToken"] as! String
+        print(authToken)
         if urlStringArray[0] == "match" {
             getMatchList(request: request, response, result)
         } else if urlStringArray[0] == "update" {
@@ -56,6 +58,7 @@ func handleUserUpdate(request: HTTPRequest, _ response: HTTPResponse) {
 func editUserInfo(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic: [String: AnyObject]) {
     print("Editing User")
     let authToken = requestBodyDic["authorityToken"] as! String
+    print(authToken)
     guard let curUser = lookupUserWith(sessionToken: authToken) else {
         print("failed to lookup user")
         badRequestResponse(response: response)
