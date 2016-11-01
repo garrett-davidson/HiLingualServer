@@ -19,7 +19,7 @@ func requestFlashcards(request: HTTPRequest, _ response: HTTPResponse) {
     let setId = request.param(name: "setid")
     //Check to see auth is good
     //get user id
-    if setId!.characters.count > 50 || setId!.characters.count < 1 {
+    if setId!.characters.count > 50 {
         print("invalid setid")
         invalidFlashcard(request: request, response)
         return

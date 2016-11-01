@@ -46,7 +46,7 @@ func handleAuth(request: HTTPRequest, _ response: HTTPResponse) {
         response.completed()
     } catch {
         if verbose {print("bad request, invalid json syntax")}
-        badRequestResponse(response: response)
+        //badRequestResponse(response: response)
         return
     }
 }
@@ -175,6 +175,7 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
         return
     }
     let authorityAccountId = requestBodyDic["authorityAccountId"] as! String
+    print(authorityAccountId)
     guard let authorityToken = requestBodyDic["authorityToken"] as? String else {
        // badRequestResponse(response: response)
         return
