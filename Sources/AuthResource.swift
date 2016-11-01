@@ -170,10 +170,6 @@ func registerWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyD
         print(requestBodyDic["authorityAccountId"])
         print(requestBodyDic["authorityToken"])
     }
-    guard let _ = requestBodyDic["authority"] as? String else {
-        badRequestResponse(response: response)
-        return
-    }
     let authorityAccountId = requestBodyDic["authorityAccountId"] as! String
     print(authorityAccountId)
     let authority = requestBodyDic["authority"] as! String
