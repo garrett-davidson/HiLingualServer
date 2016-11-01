@@ -392,7 +392,7 @@ func convertRowToUserWith(row: [String?]) -> User? {
         newUser.setLearningLanguage(newLearningLanguage: learningLanguage)
     }
 
-    if let authAccountId = row[9] {
+    if let authAccountId = row[10] {
         newUser.setAuthorityAccountId(newAuthorityAccountId: authAccountId)
     }
 
@@ -434,7 +434,7 @@ func lookupUserWith(sessionToken: String) -> User? {
     return tempUser.getSessionToken() == sessionToken ? tempUser : nil
 }
 
-func getMatches(nativeLanguage: String, learningLanguage: String, userBirthdate: Int) -> [User] {
+func getMatches(nativeLanguage: String, learningLanguage: String, userBirthdate: Int) -> [Int] {
     var listOfMatches = [User]()
     let learningArray = learningLanguage.components(separatedBy: ",")
     let nativeArray = nativeLanguage.components(separatedBy: ",")
@@ -470,11 +470,11 @@ func getMatches(nativeLanguage: String, learningLanguage: String, userBirthdate:
     }
 
     let sortedArray = listOfMatches.sorted {abs($0.getBirthdate() - userBirthdate) < abs($1.getBirthdate() - userBirthdate)}
-    var finalArray = [User]()
+    var finalArray = [Int]()
     for user in sortedArray {
-        finalArray.append(user)
+        finalArray.append(user.getUserId())
     }
-    return listOfMatches
+    return finalArray
 }
 
 func getFlashcards(userId: Int, setId: String) -> [Flashcard]? {
