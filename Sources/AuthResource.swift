@@ -172,6 +172,8 @@ func logoutWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic
         if !logoutUserWith(userId: userIdInt, sessionId: auth) {
         	badRequestResponse(response: response)
         }
+    } else {
+        print("Could not verifyAuthToken")
     }
 }
 
