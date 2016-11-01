@@ -208,7 +208,7 @@ func sendMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         return
     }
 
-    if message.characters.count > 500 {
+    if message.characters.count > 100 {
         print("message too long")
         invalidMessage(request: request, response)
         return
