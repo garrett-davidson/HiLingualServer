@@ -64,12 +64,12 @@ func verifyAuthToken(request: HTTPRequest, _ response: HTTPResponse, _ requestBo
         if checkFacebookAuthority(token) {
             return true
         }
-        unauthorizedResponse(response: response)
+        //unauthorizedResponse(response: response)
     } else if auth == "GOOGLE" {
         if checkGoogleAuthority(token) {
             return true
         }
-        unauthorizedResponse(response: response)
+        //unauthorizedResponse(response: response)
     } else {
         if verbose {print("bad authority sent")}
         //unauthorizedResponse(response: response)
@@ -123,6 +123,7 @@ func loginWith(request: HTTPRequest, _ response: HTTPResponse, _ requestBodyDic:
         print(requestBodyDic["authorityToken"])
     }
     let authorityProvider = requestBodyDic["authority"] as! String
+    print(authorityProvider)
     guard let authorityAccountId = requestBodyDic["authorityAccountId"] as? String else {
         if verbose {print("no authID sent")}
         badRequestResponse(response: response)
