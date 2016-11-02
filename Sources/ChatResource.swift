@@ -81,7 +81,7 @@ func translateMessageWith(request: HTTPRequest, _ response: HTTPResponse) {
         return
     }
 
-    if message.characters.count > 100 {
+    if message.characters.count >= 500 {
         print("message too long")
         invalidMessage(request: request, response)
         return

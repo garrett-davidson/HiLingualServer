@@ -488,7 +488,7 @@ func getFlashcards(userId: Int, setId: String) -> [Flashcard]? {
         print("Unable to encode message")
         return nil
     }
-    guard dataMysql.query(statement: "SELECT * from hl_flashcards WHERE user_id = \(userId) AND setId = \"\(encodedSetId)\"") else {
+    guard dataMysql.query(statement: "SELECT * from hl_flashcards WHERE setId = \"\(encodedSetId)\"") else {
         if verbose {
             print("none1")
         }
